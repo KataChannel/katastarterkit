@@ -117,7 +117,26 @@ export class FileService {
   }
 
   /**
-   * Get file by ID
+   * Get file by ID (without permission check - for admin use)
+   */
+  async getFileById(id: string): Promise<File> {
+    const file = await this.prisma.file.findUnique({
+      where: { id },
+      include: {
+        folder: true,
+        shares: true,
+      },
+    });
+
+    if (!file) {
+      throw new NotFoundException('File not found');
+    }
+
+    return file;
+  }
+
+  /**
+   * Get file by ID (with permission check)
    */
   async getFile(id: string, userId: string): Promise<File> {
     const file = await this.prisma.file.findUnique({
@@ -236,12 +255,65 @@ export class FileService {
   }
 
   /**
+   * Rename file trên MinIO và cập nhật database
+   * @param id - ID của file
+   * @param newFileName - Tên file mới (không cần path, chỉ tên file)
+   * @param userId - ID của user thực hiện
+   * @param isAdmin - Có phải admin không
+   * @returns File đã được cập nhật
+   */
+  async renameFile(id: string, newFileName: string, userId: string, isAdmin: boolean = false): Promise<File> {
+    // Admin có thể rename bất kỳ file nào, user thường chỉ rename file của mình
+    const file = isAdmin 
+      ? await this.getFileById(id) 
+      : await this.getFile(id, userId);
+
+    if (!isAdmin && file.userId !== userId) {
+      throw new ForbiddenException('You do not have permission to rename this file');
+    }
+
+    // Lấy path hiện tại
+    const currentPath = file.path;
+
+    this.logger.log(`🔄 Renaming file: "${currentPath}" -> "${newFileName}"`);
+
+    try {
+      // Rename file trên MinIO - method trả về { url, path, filename }
+      const result = await this.minioService.renameFile(currentPath, newFileName);
+
+      // Cập nhật database
+      const updated = await this.prisma.file.update({
+        where: { id },
+        data: {
+          path: result.path,
+          filename: result.filename,
+          url: result.url,
+          title: newFileName.replace(/\.[^/.]+$/, ''), // Cập nhật title không có extension
+        },
+        include: {
+          folder: true,
+          shares: true,
+        },
+      });
+
+      this.logger.log(`✅ File renamed successfully: ${updated.id} - New URL: ${result.url}`);
+      return updated;
+    } catch (error) {
+      this.logger.error(`❌ Error renaming file: ${error.message}`);
+      throw new BadRequestException(`Không thể đổi tên file: ${error.message}`);
+    }
+  }
+
+  /**
    * Delete file
    */
-  async deleteFile(id: string, userId: string): Promise<boolean> {
-    const file = await this.getFile(id, userId);
+  async deleteFile(id: string, userId: string, isAdmin: boolean = false): Promise<boolean> {
+    // Admin có thể xóa bất kỳ file nào, user thường chỉ xóa file của mình
+    const file = isAdmin 
+      ? await this.getFileById(id) 
+      : await this.getFile(id, userId);
 
-    if (file.userId !== userId) {
+    if (!isAdmin && file.userId !== userId) {
       throw new ForbiddenException('You do not have permission to delete this file');
     }
 

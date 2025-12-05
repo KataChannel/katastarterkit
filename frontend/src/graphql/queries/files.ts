@@ -158,6 +158,16 @@ export const UPDATE_FILE = gql`
   }
 `;
 
+// Rename file mutation (đổi tên file trên MinIO)
+export const RENAME_FILE = gql`
+  ${FILE_FIELDS}
+  mutation RenameFile($input: RenameFileInput!) {
+    renameFile(input: $input) {
+      ...FileFields
+    }
+  }
+`;
+
 // Delete file mutation
 export const DELETE_FILE = gql`
   mutation DeleteFile($id: ID!) {

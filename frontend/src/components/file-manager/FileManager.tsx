@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import { useFiles, useFileUpload, useDeleteFile, useBulkDeleteFiles } from '@/hooks/useFiles';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useFiles, useFileUpload, useDeleteFile, useBulkDeleteFiles, useRenameFile } from '@/hooks/useFiles';
 import type { File } from '@/types/file';
 import { FileType, GetFilesInput } from '@/types/file';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 import { UploadDialog } from '@/components/file-manager/UploadDialog';
 import {
   Dialog,
@@ -35,6 +36,8 @@ import {
   MoreVertical,
   FolderPlus,
   RefreshCw,
+  Pencil,
+  Loader2,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -44,7 +47,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-
 type ViewMode = 'grid' | 'list';
 
 interface SortOption {
@@ -87,12 +89,22 @@ export function FileManager({
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  // Rename dialog state
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [fileToRename, setFileToRename] = useState<File | null>(null);
+  const [newFileName, setNewFileName] = useState('');
+  const [isRenaming, setIsRenaming] = useState(false);
   const { toast } = useToast();
 
   // Use external props if provided, otherwise use internal state
   const viewMode = externalViewMode || internalViewMode;
   const searchQuery = externalSearchQuery !== undefined ? externalSearchQuery : internalSearchQuery;
   const sortBy = externalSortBy || { field: 'date' as const, order: 'desc' as const };
+
+  // Reset page to 1 when search query or filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, filter?.type, fileTypes]);
 
   // Build query input
   const queryInput = {
@@ -115,6 +127,7 @@ export function FileManager({
   const { files, loading, refetch } = useFiles(queryInput);
   const { uploadFile, uploadFiles, uploading } = useFileUpload();
   const { deleteFile } = useDeleteFile();
+  const { renameFile } = useRenameFile();
   const { bulkDeleteFiles } = useBulkDeleteFiles();
 
   // File upload handler
@@ -210,6 +223,46 @@ export function FileManager({
           variant: 'destructive',
         });
       }
+    }
+  };
+
+  // Open rename dialog
+  const openRenameDialog = (file: File) => {
+    setFileToRename(file);
+    // Lấy tên file không có extension để user dễ sửa
+    const nameWithoutExt = (file.title || file.originalName).replace(/\.[^/.]+$/, '');
+    setNewFileName(nameWithoutExt);
+    setRenameDialogOpen(true);
+  };
+
+  // Handle rename file (đổi tên trên MinIO)
+  const handleRenameFile = async () => {
+    if (!fileToRename || !newFileName.trim()) return;
+
+    setIsRenaming(true);
+    try {
+      await renameFile({
+        id: fileToRename.id,
+        newFileName: newFileName.trim(),
+      });
+      toast({
+        type: 'success',
+        title: 'Đổi tên thành công',
+        description: `Đã đổi tên file thành "${newFileName.trim()}" và cập nhật URL trên MinIO`,
+      });
+      setRenameDialogOpen(false);
+      setFileToRename(null);
+      setNewFileName('');
+      refetch();
+    } catch (error: any) {
+      toast({
+        type: 'error',
+        title: 'Lỗi đổi tên',
+        description: error.message || 'Không thể đổi tên file',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRenaming(false);
     }
   };
 
@@ -392,8 +445,8 @@ export function FileManager({
 
                       {/* Info */}
                       <div className="space-y-1">
-                        <p className="text-sm font-medium truncate" title={file.originalName}>
-                          {file.originalName}
+                        <p className="text-sm font-medium truncate" title={file.title || file.originalName}>
+                          {file.title || file.originalName}
                         </p>
                         <p className="text-xs text-gray-500">
                           {formatFileSize(file.size)}
@@ -417,14 +470,22 @@ export function FileManager({
                               window.open(file.url, '_blank');
                             }}>
                               <Eye className="w-4 h-4 mr-2" />
-                              View
+                              Xem
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => {
                               e.stopPropagation();
                               window.open(file.url, '_blank');
                             }}>
                               <Download className="w-4 h-4 mr-2" />
-                              Download
+                              Tải xuống
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              openRenameDialog(file);
+                            }}>
+                              <Pencil className="w-4 h-4 mr-2" />
+                              Đổi tên
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -435,7 +496,7 @@ export function FileManager({
                               className="text-red-600"
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
-                              Delete
+                              Xóa
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -467,7 +528,7 @@ export function FileManager({
 
                           {/* Info */}
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{file.originalName}</p>
+                            <p className="font-medium truncate">{file.title || file.originalName}</p>
                             <div className="flex items-center gap-4 text-sm text-gray-500">
                               <span>{formatFileSize(file.size)}</span>
                               <span>{new Date(file.createdAt).toLocaleDateString()}</span>
@@ -489,14 +550,22 @@ export function FileManager({
                               window.open(file.url, '_blank');
                             }}>
                               <Eye className="w-4 h-4 mr-2" />
-                              View
+                              Xem
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => {
                               e.stopPropagation();
                               window.open(file.url, '_blank');
                             }}>
                               <Download className="w-4 h-4 mr-2" />
-                              Download
+                              Tải xuống
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              openRenameDialog(file);
+                            }}>
+                              <Pencil className="w-4 h-4 mr-2" />
+                              Đổi tên
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -507,7 +576,7 @@ export function FileManager({
                               className="text-red-600"
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
-                              Delete
+                              Xóa
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -635,6 +704,84 @@ export function FileManager({
                 <>
                   <Trash2 className="h-4 w-4 mr-2" />
                   Xóa
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rename Dialog */}
+      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="h-5 w-5" />
+              Đổi tên file
+            </DialogTitle>
+            <DialogDescription>
+              Nhập tên mới cho file này
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="filename">Tên file mới</Label>
+              <Input
+                id="filename"
+                value={newFileName}
+                onChange={(e) => setNewFileName(e.target.value)}
+                placeholder="Nhập tên file mới (VD: rau-sach, thuc-pham-huu-co)"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !isRenaming && newFileName.trim()) {
+                    handleRenameFile();
+                  }
+                }}
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground">
+                Tên file sẽ được tự động chuyển sang không dấu và thay khoảng trắng bằng dấu gạch ngang
+              </p>
+            </div>
+            {fileToRename && (
+              <div className="space-y-2 p-3 bg-muted/50 rounded-lg text-xs">
+                <div>
+                  <span className="font-medium">Tên gốc: </span>
+                  <span className="text-muted-foreground">{fileToRename.originalName}</span>
+                </div>
+                <div>
+                  <span className="font-medium">URL hiện tại: </span>
+                  <span className="text-muted-foreground break-all">{fileToRename.url}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setRenameDialogOpen(false);
+                setFileToRename(null);
+                setNewFileName('');
+              }}
+              disabled={isRenaming}
+            >
+              Hủy
+            </Button>
+            <Button
+              onClick={handleRenameFile}
+              disabled={isRenaming || !newFileName.trim()}
+            >
+              {isRenaming ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Đang đổi tên...
+                </>
+              ) : (
+                <>
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Đổi tên trên MinIO
                 </>
               )}
             </Button>

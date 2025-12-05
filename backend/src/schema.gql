@@ -3494,6 +3494,7 @@ type Mutation {
   """Xóa thành viên khỏi project"""
   removeProjectMember(memberId: String!, projectId: ID!): Boolean!
   removeRoleFromUser(roleId: String!, userId: String!): RemoveRoleResultType!
+  renameFile(input: RenameFileInput!): File!
   reorderLessons(input: ReorderLessonsInput!): [Lesson!]!
   reorderMenus(menuOrders: [MenuOrderDto!]!): [MenuResponseDto!]!
   reorderModules(input: ReorderModulesInput!): [CourseModule!]!
@@ -5202,6 +5203,11 @@ type RemoveFromCartResponse {
 type RemoveRoleResultType {
   message: String!
   success: Boolean!
+}
+
+input RenameFileInput {
+  id: ID!
+  newFileName: String!
 }
 
 input ReorderLessonsInput {

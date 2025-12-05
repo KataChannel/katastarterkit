@@ -365,6 +365,68 @@ export class MinioService implements OnModuleInit {
   }
 
   /**
+   * Rename/Move file trong MinIO
+   * MinIO không hỗ trợ rename trực tiếp, phải copy file sang tên mới rồi xóa file cũ
+   * @param oldPath - Path cũ của file (ví dụ: general/old-name.webp)
+   * @param newFileName - Tên file mới (chỉ tên, không bao gồm folder)
+   * @returns URL public của file mới
+   */
+  async renameFile(oldPath: string, newFileName: string): Promise<{ url: string; path: string; filename: string }> {
+    try {
+      // Tách folder từ oldPath
+      const pathParts = oldPath.split('/');
+      const oldFileName = pathParts.pop();
+      const folder = pathParts.join('/') || 'general';
+      
+      // Lấy extension từ file hiện tại
+      const oldExt = oldFileName?.split('.').pop() || 'webp';
+      
+      // Chuyển tên file mới sang slug
+      const slugNewFileName = this.vietnameseToSlug(newFileName)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .replace(/-+/g, '-');
+      
+      // Tạo tên file mới với extension
+      const finalNewFileName = newFileName.includes('.') 
+        ? slugNewFileName 
+        : `${slugNewFileName}.${oldExt}`;
+      
+      const newPath = `${folder}/${finalNewFileName}`;
+      
+      this.logger.log(`🔄 Renaming file: "${oldPath}" -> "${newPath}"`);
+      
+      // Copy file sang tên mới
+      const copySource = `/${this.bucketName}/${oldPath}`;
+      await this.minioClient.copyObject(
+        this.bucketName,
+        newPath,
+        copySource,
+        new Minio.CopyConditions(),
+      );
+      
+      this.logger.log(`✅ Copied file to: ${newPath}`);
+      
+      // Xóa file cũ
+      await this.minioClient.removeObject(this.bucketName, oldPath);
+      this.logger.log(`✅ Deleted old file: ${oldPath}`);
+      
+      // Trả về URL mới
+      const url = `${this.publicUrl}/${this.bucketName}/${newPath}`;
+      
+      return {
+        url,
+        path: newPath,
+        filename: finalNewFileName,
+      };
+    } catch (error) {
+      this.logger.error(`❌ Error renaming file from "${oldPath}" to "${newFileName}":`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Get file as buffer
    */
   async getFile(objectPath: string): Promise<Buffer> {

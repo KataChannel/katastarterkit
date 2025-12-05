@@ -6,6 +6,7 @@ import {
   CreateFolderInput,
   UpdateFolderInput,
   UpdateFileInput,
+  RenameFileInput,
   GetFilesInput,
   CreateFileShareInput,
   MoveFilesInput,
@@ -106,6 +107,19 @@ export class FileResolver {
   }
 
   /**
+   * Rename file (đổi tên file trên MinIO và cập nhật URL)
+   */
+  @Mutation(() => File)
+  async renameFile(
+    @Args('input', { type: () => RenameFileInput }) input: RenameFileInput,
+    @Context() context: any,
+  ): Promise<File> {
+    const userId = context.req.user.id;
+    const isAdmin = context.req.user.roleType === 'ADMIN';
+    return this.fileService.renameFile(input.id, input.newFileName, userId, isAdmin) as any;
+  }
+
+  /**
    * Delete file
    */
   @Mutation(() => Boolean)
@@ -114,7 +128,8 @@ export class FileResolver {
     @Context() context: any,
   ): Promise<boolean> {
     const userId = context.req.user.id;
-    return this.fileService.deleteFile(id, userId);
+    const isAdmin = context.req.user.roleType === 'ADMIN';
+    return this.fileService.deleteFile(id, userId, isAdmin);
   }
 
   /**

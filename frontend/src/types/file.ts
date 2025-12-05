@@ -102,6 +102,11 @@ export interface UpdateFileInput {
   metadata?: any;
 }
 
+export interface RenameFileInput {
+  id: string;
+  newFileName: string;
+}
+
 export interface CreateFolderInput {
   name: string;
   description?: string;

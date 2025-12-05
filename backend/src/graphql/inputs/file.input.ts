@@ -104,6 +104,17 @@ export class UpdateFileInput {
 }
 
 @InputType()
+export class RenameFileInput {
+  @Field(() => ID)
+  @IsString()
+  id: string;
+
+  @Field()
+  @IsString()
+  newFileName: string;
+}
+
+@InputType()
 export class FileFiltersInput {
   @Field(() => FileType, { nullable: true })
   @IsOptional()

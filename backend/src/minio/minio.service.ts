@@ -190,6 +190,62 @@ export class MinioService implements OnModuleInit {
     }
   }
 
+  /**
+   * Rename/Move file trong MinIO
+   * MinIO không hỗ trợ rename trực tiếp, phải copy file sang tên mới rồi xóa file cũ
+   * @param bucket - Tên bucket
+   * @param oldFileName - Tên file cũ (path đầy đủ trong bucket)
+   * @param newFileName - Tên file mới (path đầy đủ trong bucket)
+   * @returns URL public của file mới
+   */
+  async renameFile(bucket: string, oldFileName: string, newFileName: string): Promise<string> {
+    try {
+      await this.ensureReady();
+      
+      // Chuyển tên file mới sang slug
+      const slugNewFileName = this.createSlugFileNameWithPath(newFileName);
+      
+      this.logger.log(`🔄 Renaming file: "${oldFileName}" -> "${slugNewFileName}" in bucket "${bucket}"`);
+      
+      // Copy file sang tên mới
+      const copySource = `/${bucket}/${oldFileName}`;
+      await this.minioClient.copyObject(
+        bucket,
+        slugNewFileName,
+        copySource,
+        new Minio.CopyConditions(),
+      );
+      
+      this.logger.log(`✅ Copied file to: ${slugNewFileName}`);
+      
+      // Xóa file cũ
+      await this.minioClient.removeObject(bucket, oldFileName);
+      this.logger.log(`✅ Deleted old file: ${oldFileName}`);
+      
+      // Trả về URL mới
+      return this.getPublicUrl(bucket, slugNewFileName);
+    } catch (error) {
+      this.logger.error(`❌ Error renaming file from "${oldFileName}" to "${newFileName}":`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Tạo slug từ tên file nhưng giữ nguyên path prefix
+   * Ví dụ: "general/Hình ảnh số 1.png" -> "general/hinh-anh-so-1.png"
+   */
+  private createSlugFileNameWithPath(filePath: string): string {
+    const lastSlashIndex = filePath.lastIndexOf('/');
+    const hasPath = lastSlashIndex >= 0;
+    
+    const pathPrefix = hasPath ? filePath.substring(0, lastSlashIndex + 1) : '';
+    const fileName = hasPath ? filePath.substring(lastSlashIndex + 1) : filePath;
+    
+    const slugFileName = this.createSlugFileName(fileName);
+    
+    return pathPrefix + slugFileName;
+  }
+
   async getPresignedUrl(
     bucket: string,
     fileName: string,

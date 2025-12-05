@@ -7,6 +7,7 @@ import {
   GET_FOLDER,
   GET_STORAGE_STATS,
   UPDATE_FILE,
+  RENAME_FILE,
   DELETE_FILE,
   MOVE_FILES,
   BULK_DELETE_FILES,
@@ -22,6 +23,7 @@ import {
   FileFolder,
   GetFilesInput,
   UpdateFileInput,
+  RenameFileInput,
   CreateFolderInput,
   UpdateFolderInput,
   MoveFilesInput,
@@ -216,6 +218,24 @@ export function useUpdateFile() {
     updateFile: async (input: UpdateFileInput) => {
       const result = await updateFile({ variables: { input } });
       return result.data?.updateFile as File;
+    },
+    loading,
+    error,
+  };
+}
+
+/**
+ * Hook to rename file (đổi tên file trên MinIO và cập nhật URL)
+ */
+export function useRenameFile() {
+  const [renameFile, { loading, error }] = useMutation(RENAME_FILE, {
+    refetchQueries: [{ query: GET_FILES }],
+  });
+
+  return {
+    renameFile: async (input: RenameFileInput) => {
+      const result = await renameFile({ variables: { input } });
+      return result.data?.renameFile as File;
     },
     loading,
     error,
