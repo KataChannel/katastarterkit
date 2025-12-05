@@ -151,3 +151,94 @@ export class ClearCacheOutput {
   @Field(() => String)
   message: string;
 }
+
+// ==========================================
+// NEW DTOs - Admin & Config
+// ==========================================
+
+@ObjectType()
+export class RAGConfigOutput {
+  @Field(() => String)
+  key: string;
+
+  @Field(() => String)
+  value: string;
+
+  @Field(() => String)
+  valueType: string;
+
+  @Field(() => String, { nullable: true })
+  description?: string;
+
+  @Field(() => String, { nullable: true })
+  category?: string;
+
+  @Field(() => Boolean)
+  isSystem: boolean;
+
+  @Field(() => Date)
+  updatedAt: Date;
+}
+
+@InputType()
+export class RAGConfigInput {
+  @Field(() => String)
+  key: string;
+
+  @Field(() => String)
+  value: string;
+
+  @Field(() => String, { defaultValue: 'string' })
+  valueType: string;
+
+  @Field(() => String, { nullable: true })
+  description?: string;
+}
+
+@ObjectType()
+export class RAGUsageStatsOutput {
+  @Field(() => Int)
+  totalMessages: number;
+
+  @Field(() => Int)
+  totalConversations: number;
+
+  @Field(() => String)
+  intentBreakdown: string; // JSON string
+
+  @Field(() => Float, { nullable: true })
+  avgResponseTime?: number;
+
+  @Field(() => Float, { nullable: true })
+  avgConfidence?: number;
+}
+
+@ObjectType()
+export class RAGConversationsOutput {
+  @Field(() => String)
+  conversationId: string;
+
+  @Field(() => Date)
+  lastMessage: Date;
+
+  @Field(() => Int)
+  messageCount: number;
+}
+
+@InputType()
+export class AdminClearHistoryInput {
+  @Field(() => Int, { nullable: true, description: 'Xóa tin nhắn cũ hơn số ngày này' })
+  olderThanDays?: number;
+}
+
+@ObjectType()
+export class AdminClearHistoryOutput {
+  @Field(() => Boolean)
+  success: boolean;
+
+  @Field(() => String)
+  message: string;
+
+  @Field(() => Int)
+  deletedCount: number;
+}

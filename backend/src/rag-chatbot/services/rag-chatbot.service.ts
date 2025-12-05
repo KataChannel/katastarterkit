@@ -9,6 +9,7 @@ import { RagContextService } from './rag-context.service';
 import { RagIntentService } from './rag-intent.service';
 import { RagGeminiService } from './rag-gemini.service';
 import { RagTokenOptimizer } from './rag-token-optimizer.service';
+import { RagHistoryService } from './rag-history.service';
 import {
   RAGQuery,
   RAGResponse,
@@ -21,7 +22,7 @@ import {
 export class RagChatbotService {
   private readonly logger = new Logger(RagChatbotService.name);
   
-  // In-memory conversation storage (thay thế Prisma model chưa có)
+  // In-memory conversation storage (fallback khi chưa có user đăng nhập)
   private conversationStore: Map<string, ConversationMessage[]> = new Map();
   
   private metricsData: {
@@ -46,6 +47,7 @@ export class RagChatbotService {
     private readonly intentService: RagIntentService,
     private readonly geminiService: RagGeminiService,
     private readonly tokenOptimizer: RagTokenOptimizer,
+    private readonly historyService: RagHistoryService,
   ) {}
 
   /**
@@ -83,11 +85,23 @@ export class RagChatbotService {
         contextString,
       );
 
-      // 7. Lưu conversation nếu có userId
+      // 7. Lưu conversation (persistent storage nếu có userId)
+      const conversationId = query.conversationId || `conv-${Date.now()}`;
       if (query.userId) {
-        await this.saveConversationMessage(
+        // Lưu vào database (persistent)
+        const responseTime = Date.now() - startTime;
+        await this.historyService.saveConversationTurn(
           query.userId,
-          query.conversationId || null,
+          conversationId,
+          query.message,
+          response,
+          responseTime,
+        );
+      } else {
+        // Fallback: lưu vào memory (anonymous user)
+        await this.saveConversationMessage(
+          'anonymous',
+          conversationId,
           query.message,
           response.answer,
           intent,
@@ -218,12 +232,19 @@ ${statusSummary}`;
   }
 
   /**
-   * Lấy lịch sử hội thoại của user (in-memory storage)
+   * Lấy lịch sử hội thoại của user
+   * Ưu tiên từ database (persistent), fallback về in-memory
    */
   async getConversationHistory(userId: string, limit: number = 20): Promise<ConversationMessage[]> {
     try {
+      // Thử lấy từ database trước
+      const dbHistory = await this.historyService.getConversationHistory(userId, limit);
+      if (dbHistory.length > 0) {
+        return dbHistory;
+      }
+
+      // Fallback về in-memory nếu không có trong DB
       const history = this.conversationStore.get(userId) || [];
-      // Trả về limit tin nhắn gần nhất
       return history.slice(-limit).reverse();
     } catch (error) {
       this.logger.error('Error fetching conversation history', error);
@@ -234,10 +255,17 @@ ${statusSummary}`;
   /**
    * Xóa lịch sử hội thoại của user
    */
-  async clearConversationHistory(userId: string): Promise<void> {
+  async clearConversationHistory(userId: string, conversationId?: string): Promise<void> {
     try {
-      this.conversationStore.delete(userId);
-      this.logger.log(`Cleared conversation history for user: ${userId}`);
+      // Xóa từ database
+      await this.historyService.clearConversationHistory(userId, conversationId);
+      
+      // Xóa từ in-memory
+      if (!conversationId) {
+        this.conversationStore.delete(userId);
+      }
+      
+      this.logger.log(`Cleared conversation history for user: ${userId}${conversationId ? `, conversation: ${conversationId}` : ''}`);
     } catch (error) {
       this.logger.error('Error clearing conversation history', error);
       throw error;

@@ -283,6 +283,9 @@ model User {
   // AI Provider Relations
   aiProvidersCreated AIProvider[] @relation("AIProviderCreator")
 
+  // RAG Chatbot Relations
+  ragChatHistories RAGChatHistory[] @relation("RAGChatUser")
+
   // Release Hub & Support Center Relations
   releasesCreated         SystemRelease[]          @relation("ReleaseCreatedBy")
   releasesUpdated         SystemRelease[]          @relation("ReleaseUpdatedBy")
@@ -6358,4 +6361,119 @@ model AcademyMediaCoverage {
   @@index([displayOrder])
   @@index([publishedDate])
   @@map("academy_media_coverages")
+}
+
+// ============================================
+// RAG CHATBOT - Lịch sử hội thoại AI
+// ============================================
+
+enum RAGIntentType {
+  QUERY_SANPHAM
+  QUERY_DONHANG
+  QUERY_KHACHHANG
+  QUERY_TONKHO
+  QUERY_NHACUNGCAP
+  QUERY_THONGKE
+  QUERY_BANGGIA
+  QUERY_KHO
+  GENERAL
+  UNKNOWN
+}
+
+// RAG Chat History - Lưu trữ lịch sử chat với AI
+model RAGChatHistory {
+  id             String   @id @default(uuid())
+  conversationId String   @default(uuid()) // Group messages by conversation
+
+  // User Info
+  userId String?
+  user   User?   @relation("RAGChatUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  // Message Content
+  role       String // 'user' | 'assistant' | 'system'
+  message    String @db.Text
+  answer     String? @db.Text // AI response
+
+  // Context & Intent
+  intent       RAGIntentType @default(GENERAL)
+  contextTypes String[] // ['sanpham', 'donhang', ...]
+  contextUsed  Json? // Actual context data used
+
+  // Sources & Metadata
+  sources     Json? // Array of source references
+  confidence  Float? // AI confidence score
+  tokensUsed  Int? // Tokens consumed
+  
+  // Performance
+  responseTime Int? // Response time in ms
+
+  // Suggested actions
+  suggestedQueries String[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([conversationId])
+  @@index([intent])
+  @@index([createdAt])
+  @@map("rag_chat_histories")
+}
+
+// RAG Config - Cấu hình RAG Chatbot (Admin settings)
+model RAGConfig {
+  id   String @id @default(uuid())
+  key  String @unique // Config key
+  
+  // Value
+  value     String @db.Text // JSON string value
+  valueType String @default("string") // 'string' | 'number' | 'boolean' | 'json'
+  
+  // Metadata
+  description String?
+  category    String? // 'model', 'context', 'rate_limit', 'feature'
+  
+  // Admin
+  isActive  Boolean @default(true)
+  isSystem  Boolean @default(false) // System configs cannot be deleted
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@index([category])
+  @@index([isActive])
+  @@map("rag_configs")
+}
+
+// RAG Analytics - Thống kê sử dụng
+model RAGAnalytics {
+  id String @id @default(uuid())
+  
+  // Time period
+  date DateTime @db.Date
+  hour Int? // 0-23, nullable for daily aggregation
+  
+  // Metrics
+  totalQueries     Int @default(0)
+  successfulQueries Int @default(0)
+  failedQueries    Int @default(0)
+  
+  avgResponseTime  Float? // Average response time in ms
+  avgTokensUsed    Int? // Average tokens per query
+  avgConfidence    Float? // Average AI confidence
+  
+  // Intent breakdown
+  intentBreakdown Json? // { "QUERY_SANPHAM": 10, "QUERY_DONHANG": 5 }
+  
+  // Top queries
+  topQueries Json? // Array of most common queries
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, hour])
+  @@index([date])
+  @@map("rag_analytics")
 }
