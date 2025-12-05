@@ -92,9 +92,9 @@ export default function ProductsPage() {
       field: 'thumbnail',
       headerName: 'Hình ảnh',
       width: 100,
-      pinned: 'left',
       sortable: false,
       filterable: false,
+      resizable: true,
       cellRenderer: ({ value, data }) => (
         <div className="flex items-center justify-center p-1">
           {value ? (
@@ -136,6 +136,7 @@ export default function ProductsPage() {
       type: 'select',
       sortable: true,
       filterable: true,
+      resizable: true,
       filterOptions: categories.map(c => c.name),
       cellRenderer: ({ value }) => value?.name || '-',
     },
@@ -146,6 +147,7 @@ export default function ProductsPage() {
       type: 'number',
       sortable: true,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ value }) => (
         <div className="font-semibold text-sm sm:text-base text-green-600">
           {new Intl.NumberFormat('vi-VN', {
@@ -162,6 +164,7 @@ export default function ProductsPage() {
       type: 'number',
       sortable: true,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ value }) => (
         <div className={`text-center font-medium text-sm sm:text-base ${
           value === 0 ? 'text-red-600' : value < 10 ? 'text-yellow-600' : 'text-green-600'
@@ -177,8 +180,8 @@ export default function ProductsPage() {
       type: 'select',
       sortable: true,
       filterable: true,
+      resizable: true,
       filterOptions: ['active', 'draft', 'out_of_stock', 'archived'],
-      pinned: 'right',
       cellRenderer: ({ value }) => {
         const statusConfig = {
           active: { label: 'Hoạt động', variant: 'default' as const, icon: Package },
@@ -202,9 +205,9 @@ export default function ProductsPage() {
       field: 'id',
       headerName: 'Thao tác',
       width: 150,
-      pinned: 'right',
       sortable: false,
       filterable: false,
+      resizable: true,
       cellRenderer: ({ data }) => (
         <div className="flex items-center gap-1 sm:gap-2">
           <Button

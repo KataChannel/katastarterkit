@@ -266,6 +266,10 @@ export function ColumnHeader<T extends RowData>({
             isDragging && 'bg-blue-500'
           )}
           onMouseDown={handleMouseDown}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            onAutoSize?.();
+          }}
           onClick={(e) => e.stopPropagation()}
         />
       )}

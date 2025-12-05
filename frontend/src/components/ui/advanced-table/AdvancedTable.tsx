@@ -18,7 +18,9 @@ import {
   RotateCcw,
   Eye,
   EyeOff,
-  Maximize2
+  Maximize2,
+  Minimize2,
+  Maximize
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -59,6 +61,7 @@ export function AdvancedTable<T extends RowData>({
   const [showColumnSettings, setShowColumnSettings] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Configuration defaults
   const {
@@ -190,10 +193,40 @@ export function AdvancedTable<T extends RowData>({
   }, []);
 
   const handleAutoSizeColumn = useCallback((field: keyof T) => {
-    // Simple auto-sizing logic - in a real implementation, you'd measure content
-    const newWidth = Math.max(100, Math.min(300, String(field).length * 10 + 80));
-    handleColumnResize(field, newWidth);
-  }, [handleColumnResize]);
+    // Calculate width based on actual content in data
+    const column = columns.find(col => col.field === field);
+    if (!column) return;
+    
+    // Start with header width
+    const headerText = column.headerName || String(field);
+    let maxWidth = headerText.length * 9 + 60; // header text + padding + sort/filter icons
+    
+    // Check all data values
+    processedData.forEach(row => {
+      const value = row[field];
+      let textLength = 0;
+      
+      if (value === null || value === undefined) {
+        textLength = 1;
+      } else if (typeof value === 'object') {
+        // Handle objects like category: { name: 'xxx' }
+        const displayValue = (value as any)?.name || (value as any)?.title || JSON.stringify(value);
+        textLength = String(displayValue).length;
+      } else if (typeof value === 'number') {
+        // Format numbers
+        textLength = new Intl.NumberFormat('vi-VN').format(value).length;
+      } else {
+        textLength = String(value).length;
+      }
+      
+      const cellWidth = textLength * 8 + 24; // 8px per char + padding
+      maxWidth = Math.max(maxWidth, cellWidth);
+    });
+    
+    // Apply min/max constraints
+    const finalWidth = Math.max(80, Math.min(500, maxWidth));
+    handleColumnResize(field, finalWidth);
+  }, [handleColumnResize, columns, processedData]);
 
   const handleAutoSizeAllColumns = useCallback(() => {
     visibleColumns.forEach(col => {
@@ -329,14 +362,19 @@ export function AdvancedTable<T extends RowData>({
   }
 
   return (
-    <div className={cn('border rounded-lg overflow-hidden bg-white', className)}>
-      {/* Toolbar - Responsive */}
+    <div className={cn(
+      'border rounded-lg overflow-hidden bg-white',
+      isFullscreen && 'fixed inset-0 z-50 rounded-none',
+      className
+    )}>
+      {/* Toolbar - Single Row Optimized */}
       {showToolbar && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 sm:p-4 border-b bg-gray-50">
-          <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center justify-between gap-2 p-2 border-b bg-gray-50">
+          {/* Left: Selection info + Actions */}
+          <div className="flex items-center gap-2 min-w-0">
             {enableRowSelection && selectedRows.size > 0 && (
               <>
-                <Badge variant="secondary" className="text-xs sm:text-sm">
+                <Badge variant="secondary" className="text-xs whitespace-nowrap">
                   {selectedRows.size} selected
                 </Badge>
                 {enableRowDeletion && (
@@ -344,42 +382,51 @@ export function AdvancedTable<T extends RowData>({
                     variant="destructive"
                     size="sm"
                     onClick={() => setShowDeleteDialog(true)}
-                    className="text-xs sm:text-sm"
+                    className="h-8 px-2 text-xs"
                   >
-                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                    <span className="hidden sm:inline">Delete</span>
-                    <span className="sm:hidden">Del</span>
+                    <Trash2 className="w-3.5 h-3.5" />
                   </Button>
                 )}
               </>
             )}
             {onRowCreate && (
-              <Button size="sm" onClick={() => onRowCreate({} as Partial<T>)} className="text-xs sm:text-sm">
-                <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                <span className="hidden sm:inline">Add Row</span>
-                <span className="sm:hidden">Add</span>
+              <Button size="sm" onClick={() => onRowCreate({} as Partial<T>)} className="h-8 px-2 text-xs">
+                <Plus className="w-3.5 h-3.5" />
               </Button>
             )}
           </div>
           
-          <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
-            <Button variant="outline" size="sm" onClick={handleExport} className="text-xs sm:text-sm flex-1 sm:flex-none">
-              <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+          {/* Right: Tools */}
+          <div className="flex items-center gap-1.5">
+            <Button variant="outline" size="sm" onClick={handleExport} className="h-8 px-2 text-xs">
+              <Download className="w-3.5 h-3.5 mr-1" />
               <span className="hidden sm:inline">Export</span>
-              <span className="sm:hidden">CSV</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={handleAutoSizeAllColumns} className="text-xs sm:text-sm hidden md:flex">
-              <Maximize2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-              Auto Size All
+            <Button variant="outline" size="sm" onClick={handleAutoSizeAllColumns} className="h-8 px-2 text-xs">
+              <Maximize2 className="w-3.5 h-3.5 mr-1" />
+              <span className="hidden md:inline">Auto Size</span>
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowColumnSettings(true)}
-              className="text-xs sm:text-sm flex-1 sm:flex-none"
+              className="h-8 px-2 text-xs"
             >
-              <Settings className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-              Columns
+              <Settings className="w-3.5 h-3.5 mr-1" />
+              <span className="hidden sm:inline">Columns</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="h-8 px-2 text-xs"
+              title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+            >
+              {isFullscreen ? (
+                <Minimize2 className="w-3.5 h-3.5" />
+              ) : (
+                <Maximize className="w-3.5 h-3.5" />
+              )}
             </Button>
           </div>
         </div>
@@ -398,8 +445,12 @@ export function AdvancedTable<T extends RowData>({
 
       {/* Google Sheets Style Table - Full Width with Fixed Header + Frozen Columns */}
       <div 
-        className="relative overflow-auto"
-        style={{ height: height - (showToolbar ? 60 : 0) - (enableFiltering ? 80 : 0) }}
+        className="relative overflow-auto flex-1"
+        style={{ 
+          height: isFullscreen 
+            ? `calc(100vh - ${(showToolbar ? 48 : 0) + (enableFiltering ? 56 : 0)}px)` 
+            : height - (showToolbar ? 48 : 0) - (enableFiltering ? 56 : 0) 
+        }}
       >
         {/* Sticky Header Container - Full Width */}
         <div className="w-full min-w-full sticky top-0 z-20 flex bg-white">
