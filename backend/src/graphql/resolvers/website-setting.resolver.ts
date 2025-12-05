@@ -17,6 +17,9 @@ export class WebsiteSetting {
   key: string;
 
   @Field()
+  domain: string;
+
+  @Field()
   label: string;
 
   @Field({ nullable: true })
@@ -66,14 +69,30 @@ export class WebsiteSetting {
 export class WebsiteSettingResolver {
   constructor(private prisma: PrismaService) {}
 
+  // Helper to get current domain from env or default
+  private getCurrentDomain(): string {
+    return process.env.SITE_DOMAIN || process.env.DOMAIN || 'default';
+  }
+
   @Query(() => [WebsiteSetting], { name: 'websiteSettings' })
   async getWebsiteSettings(
     @Args('category', { type: () => SettingCategory, nullable: true }) category?: SettingCategory,
     @Args('group', { nullable: true }) group?: string,
     @Args('isActive', { nullable: true }) isActive?: boolean,
     @Args('isPublic', { nullable: true }) isPublic?: boolean,
+    @Args('domain', { nullable: true }) domain?: string,
   ): Promise<WebsiteSetting[]> {
     const where: any = {};
+    // Filter by domain if provided, otherwise get current domain settings
+    if (domain) {
+      where.domain = domain;
+    } else {
+      // Get settings for current domain OR default settings
+      where.OR = [
+        { domain: this.getCurrentDomain() },
+        { domain: 'default' },
+      ];
+    }
     if (category) where.category = category;
     if (group) where.group = group;
     if (typeof isActive === 'boolean') where.isActive = isActive;
@@ -90,11 +109,21 @@ export class WebsiteSettingResolver {
     @Args('category', { type: () => SettingCategory, nullable: true }) category?: SettingCategory,
     @Args('group', { nullable: true }) group?: string,
     @Args('keys', { type: () => [String], nullable: true }) keys?: string[],
+    @Args('domain', { nullable: true }) domain?: string,
   ): Promise<WebsiteSetting[]> {
     const where: any = {
       isActive: true,
       isPublic: true,
     };
+    // Filter by domain
+    if (domain) {
+      where.domain = domain;
+    } else {
+      where.OR = [
+        { domain: this.getCurrentDomain() },
+        { domain: 'default' },
+      ];
+    }
     if (category) where.category = category;
     if (group) where.group = group;
     if (keys && keys.length > 0) where.key = { in: keys };
@@ -106,44 +135,89 @@ export class WebsiteSettingResolver {
   }
 
   @Query(() => WebsiteSetting, { name: 'websiteSetting', nullable: true })
-  async getWebsiteSetting(@Args('key') key: string): Promise<WebsiteSetting | null> {
-    return await this.prisma.websiteSetting.findUnique({
-      where: { key },
-    }) as WebsiteSetting | null;
+  async getWebsiteSetting(
+    @Args('key') key: string,
+    @Args('domain', { nullable: true }) domain?: string,
+  ): Promise<WebsiteSetting | null> {
+    const targetDomain = domain || this.getCurrentDomain();
+    // Try to find setting for specific domain first, then fallback to default
+    let setting = await this.prisma.websiteSetting.findFirst({
+      where: { key, domain: targetDomain },
+    });
+    if (!setting) {
+      setting = await this.prisma.websiteSetting.findFirst({
+        where: { key, domain: 'default' },
+      });
+    }
+    return setting as WebsiteSetting | null;
   }
 
   @Query(() => [WebsiteSetting], { name: 'websiteSettingsByCategory' })
-  async getWebsiteSettingsByCategory(@Args('category') category: string): Promise<WebsiteSetting[]> {
+  async getWebsiteSettingsByCategory(
+    @Args('category') category: string,
+    @Args('domain', { nullable: true }) domain?: string,
+  ): Promise<WebsiteSetting[]> {
+    const where: any = {
+      category: category as any,
+      isActive: true,
+      isPublic: true,
+    };
+    if (domain) {
+      where.domain = domain;
+    } else {
+      where.OR = [
+        { domain: this.getCurrentDomain() },
+        { domain: 'default' },
+      ];
+    }
     return await this.prisma.websiteSetting.findMany({
-      where: {
-        category: category as any,
-        isActive: true,
-        isPublic: true,
-      },
+      where,
       orderBy: { order: 'asc' },
     }) as WebsiteSetting[];
   }
 
   @Query(() => [WebsiteSetting], { name: 'headerSettings' })
-  async getHeaderSettings(): Promise<WebsiteSetting[]> {
+  async getHeaderSettings(
+    @Args('domain', { nullable: true }) domain?: string,
+  ): Promise<WebsiteSetting[]> {
+    const where: any = {
+      category: 'HEADER' as any,
+      isActive: true,
+      isPublic: true,
+    };
+    if (domain) {
+      where.domain = domain;
+    } else {
+      where.OR = [
+        { domain: this.getCurrentDomain() },
+        { domain: 'default' },
+      ];
+    }
     return await this.prisma.websiteSetting.findMany({
-      where: {
-        category: 'HEADER' as any,
-        isActive: true,
-        isPublic: true,
-      },
+      where,
       orderBy: { order: 'asc' },
     }) as WebsiteSetting[];
   }
 
   @Query(() => [WebsiteSetting], { name: 'footerSettings' })
-  async getFooterSettings(): Promise<WebsiteSetting[]> {
+  async getFooterSettings(
+    @Args('domain', { nullable: true }) domain?: string,
+  ): Promise<WebsiteSetting[]> {
+    const where: any = {
+      category: 'FOOTER' as any,
+      isActive: true,
+      isPublic: true,
+    };
+    if (domain) {
+      where.domain = domain;
+    } else {
+      where.OR = [
+        { domain: this.getCurrentDomain() },
+        { domain: 'default' },
+      ];
+    }
     return await this.prisma.websiteSetting.findMany({
-      where: {
-        category: 'FOOTER' as any,
-        isActive: true,
-        isPublic: true,
-      },
+      where,
       orderBy: { order: 'asc' },
     }) as WebsiteSetting[];
   }
@@ -154,9 +228,18 @@ export class WebsiteSettingResolver {
   async updateWebsiteSetting(
     @Args('key') key: string,
     @Args('input') input: UpdateWebsiteSettingInput,
+    @Args('domain', { nullable: true }) domain?: string,
   ): Promise<WebsiteSetting> {
+    const targetDomain = domain || this.getCurrentDomain();
+    // Find the setting first
+    const existing = await this.prisma.websiteSetting.findFirst({
+      where: { key, domain: targetDomain },
+    });
+    if (!existing) {
+      throw new Error(`Setting with key "${key}" and domain "${targetDomain}" not found`);
+    }
     return await this.prisma.websiteSetting.update({
-      where: { key },
+      where: { id: existing.id },
       data: {
         ...input,
         updatedAt: new Date(),
@@ -167,10 +250,15 @@ export class WebsiteSettingResolver {
   @Mutation(() => WebsiteSetting, { name: 'createWebsiteSetting' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRoleType.ADMIN)
-  async createWebsiteSetting(@Args('input') input: CreateWebsiteSettingInput): Promise<WebsiteSetting> {
+  async createWebsiteSetting(
+    @Args('input') input: CreateWebsiteSettingInput,
+    @Args('domain', { nullable: true }) domain?: string,
+  ): Promise<WebsiteSetting> {
+    const targetDomain = domain || this.getCurrentDomain();
     return await this.prisma.websiteSetting.create({
       data: {
         ...input,
+        domain: targetDomain,
       },
     }) as WebsiteSetting;
   }
@@ -178,9 +266,19 @@ export class WebsiteSettingResolver {
   @Mutation(() => WebsiteSetting, { name: 'deleteWebsiteSetting' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRoleType.ADMIN)
-  async deleteWebsiteSetting(@Args('key') key: string): Promise<WebsiteSetting> {
+  async deleteWebsiteSetting(
+    @Args('key') key: string,
+    @Args('domain', { nullable: true }) domain?: string,
+  ): Promise<WebsiteSetting> {
+    const targetDomain = domain || this.getCurrentDomain();
+    const existing = await this.prisma.websiteSetting.findFirst({
+      where: { key, domain: targetDomain },
+    });
+    if (!existing) {
+      throw new Error(`Setting with key "${key}" and domain "${targetDomain}" not found`);
+    }
     return await this.prisma.websiteSetting.delete({
-      where: { key },
+      where: { id: existing.id },
     }) as WebsiteSetting;
   }
 }

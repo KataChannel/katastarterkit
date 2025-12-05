@@ -442,13 +442,13 @@ export class DatabaseTemplateService {
     return [
       {
         id: '1',
-        name: 'Rau muống hữu cơ',
-        description: 'Rau muống tươi ngon, trồng hữu cơ không thuốc trừ sâu',
+        name: 'Rau muống sạch',
+        description: 'Rau muống tươi ngon, trồng sạch không thuốc trừ sâu',
         price: 15000,
         originalPrice: 20000,
         discountPercentage: 25,
         images: [
-          { url: '/images/rau-muong.jpg', alt: 'Rau muống hữu cơ', isPrimary: true }
+          { url: '/images/rau-muong.jpg', alt: 'Rau muống sạch', isPrimary: true }
         ],
         category: { name: 'Rau xanh', slug: 'rau-xanh' },
         status: 'ACTIVE',

@@ -80,7 +80,6 @@ async function seedProductsAndCategories() {
       isOnSale: true,
       displayOrder: 1,
       attributes: {
-        organic: true,
         pesticide_free: true,
         freshness: 'Hái trong ngày',
       },
@@ -107,7 +106,6 @@ async function seedProductsAndCategories() {
       isOnSale: true,
       displayOrder: 2,
       attributes: {
-        organic: false,
         vgap: true,
       },
       metaTitle: 'Cải xanh Lâm Đồng',
@@ -176,7 +174,6 @@ async function seedProductsAndCategories() {
       displayOrder: 1,
       attributes: {
         size: 'Trung bình',
-        organic: true,
       },
       metaTitle: 'Cà rốt Đà Lạt ngọt giòn',
       metaKeywords: 'cà rốt, đà lạt, rau củ',

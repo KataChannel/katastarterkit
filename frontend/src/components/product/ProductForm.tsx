@@ -43,7 +43,6 @@ const productSchema = z.object({
   isFeatured: z.boolean().optional(),
   isNew: z.boolean().optional(),
   isBestSeller: z.boolean().optional(),
-  isOrganic: z.boolean().optional(),
   weight: z.number().optional(),
   dimensions: z.string().optional(),
   manufacturer: z.string().optional(),
@@ -110,7 +109,6 @@ export function ProductForm({ product, onSubmit, onCancel, loading = false }: Pr
           isFeatured: product.isFeatured || false,
           isNew: product.isNewArrival || false,
           isBestSeller: product.isBestSeller || false,
-          isOrganic: product.isFeatured || false,
           weight: product.weight || undefined,
           dimensions: product.attributes?.dimensions || '',
           manufacturer: product.attributes?.manufacturer || '',
@@ -126,7 +124,6 @@ export function ProductForm({ product, onSubmit, onCancel, loading = false }: Pr
           isFeatured: false,
           isNew: false,
           isBestSeller: false,
-          isOrganic: false,
         },
   });
 
@@ -477,16 +474,6 @@ export function ProductForm({ product, onSubmit, onCancel, loading = false }: Pr
                     />
                     <Label htmlFor="isBestSeller" className="font-normal cursor-pointer">
                       Bán chạy nhất
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="isOrganic"
-                      checked={watchedFields.isOrganic}
-                      onCheckedChange={(checked) => setValue('isOrganic', checked as boolean)}
-                    />
-                    <Label htmlFor="isOrganic" className="font-normal cursor-pointer">
-                      Hữu cơ (Organic)
                     </Label>
                   </div>
                 </div>

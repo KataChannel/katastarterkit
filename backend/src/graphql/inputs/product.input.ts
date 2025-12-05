@@ -242,11 +242,6 @@ export class UpdateProductInput {
 
   @Field({ nullable: true })
   @IsOptional()
-  @IsBoolean()
-  isOrganic?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
   @IsString()
   dimensions?: string;
 

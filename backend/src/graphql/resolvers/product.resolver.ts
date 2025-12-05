@@ -153,11 +153,6 @@ export class ProductResolver {
   }
 
   // Attributes field resolvers
-  @ResolveField(() => Boolean, { nullable: true })
-  async isOrganic(@Parent() product: any) {
-    return product.attributes?.isOrganic || null;
-  }
-
   @ResolveField(() => String, { nullable: true })
   async dimensions(@Parent() product: any) {
     return product.attributes?.dimensions || null;

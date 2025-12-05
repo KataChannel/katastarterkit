@@ -46,7 +46,7 @@ async function seedSEOSettings() {
     },
     {
       key: 'seo.meta_description',
-      value: 'Chuyên cung cấp rau sạch, thực phẩm hữu cơ chất lượng cao, an toàn cho sức khỏe. Giao hàng tận nơi tại TP.HCM.',
+      value: 'Chuyên cung cấp rau sạch, nông sản chất lượng cao, an toàn cho sức khỏe. Giao hàng tận nơi tại TP.HCM.',
       category: SettingCategory.SEO,
       label: 'Meta Description',
       description: 'Mô tả ngắn gọn hiển thị trên search engine',
@@ -58,7 +58,7 @@ async function seedSEOSettings() {
     },
     {
       key: 'seo.keywords',
-      value: 'rau sạch, rau hữu cơ, thực phẩm an toàn, rau sạch trần gia, rau sạch tphcm',
+      value: 'rau sạch, thực phẩm an toàn, rau sạch trần gia, rau sạch tphcm, nông sản sạch',
       category: SettingCategory.SEO,
       label: 'Keywords',
       description: 'Từ khóa SEO (phân cách bằng dấu phẩy)',
@@ -84,7 +84,7 @@ async function seedSEOSettings() {
     },
     {
       key: 'seo.og_description',
-      value: 'Chuyên cung cấp rau sạch, thực phẩm hữu cơ chất lượng cao',
+      value: 'Chuyên cung cấp rau sạch, nông sản chất lượng cao',
       category: SettingCategory.SEO,
       label: 'OG Description',
       description: 'Mô tả khi share trên social media',
@@ -160,7 +160,7 @@ async function seedSEOSettings() {
     },
     {
       key: 'seo.twitter_description',
-      value: 'Chuyên cung cấp rau sạch, thực phẩm hữu cơ chất lượng cao',
+      value: 'Chuyên cung cấp rau sạch, nông sản chất lượng cao',
       category: SettingCategory.SEO,
       label: 'Twitter Description',
       description: 'Mô tả khi share trên Twitter',

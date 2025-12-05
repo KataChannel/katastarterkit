@@ -948,7 +948,7 @@ export function WebsiteHeader() {
                     <p className="text-sm font-medium">Từ khóa phổ biến:</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {['Rau sạch', 'Rau hữu cơ', 'Củ quả', 'Trái cây', 'Rau ăn lá', 'Cà chua', 'Rau muống'].map((keyword) => (
+                    {['Rau sạch', 'Củ quả', 'Trái cây', 'Rau ăn lá', 'Cà chua', 'Rau muống'].map((keyword) => (
                       <Button
                         key={keyword}
                         type="button"

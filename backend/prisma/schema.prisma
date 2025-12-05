@@ -4863,7 +4863,8 @@ enum SettingCategory {
 
 model WebsiteSetting {
   id          String          @id @default(uuid())
-  key         String          @unique // e.g., "header.logo", "footer.copyright"
+  key         String          // e.g., "header.logo", "footer.copyright"
+  domain      String          @default("default") // Domain identifier: "rausach", "timona", "tazagroup", "default"
   value       String?         @db.Text // Giá trị setting (string, json, etc.)
   type        SettingType     @default(TEXT) // Kiểu dữ liệu
   category    SettingCategory @default(GENERAL) // Phân loại
@@ -4888,8 +4889,10 @@ model WebsiteSetting {
   creator User? @relation("SettingCreator", fields: [createdBy], references: [id], onDelete: SetNull)
   updater User? @relation("SettingUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
 
+  @@unique([key, domain]) // Unique per key + domain combination
   @@index([category, isActive])
   @@index([key])
+  @@index([domain])
   @@map("website_settings")
 }
 

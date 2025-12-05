@@ -101,7 +101,7 @@ export class ProductImportExportService {
       name: 'Rau muống',
       slug: 'rau-muong',
       shortDesc: 'Rau muống tươi xanh non',
-      description: 'Rau muống tươi, xanh non, được trồng theo phương pháp hữu cơ',
+      description: 'Rau muống tươi, xanh non, được trồng theo phương pháp sạch',
       price: 15000,
       originalPrice: 20000,
       costPrice: 10000,
@@ -146,10 +146,10 @@ export class ProductImportExportService {
     });
 
     sheet.addRow({
-      name: 'Rau cải hữu cơ',
-      slug: 'rau-cai-huu-co',
-      shortDesc: 'Rau cải xanh hữu cơ',
-      description: 'Rau cải xanh trồng hữu cơ, không hóa chất',
+      name: 'Rau cải sạch',
+      slug: 'rau-cai-sach',
+      shortDesc: 'Rau cải xanh sạch',
+      description: 'Rau cải xanh trồng sạch, không hóa chất',
       price: 12000,
       originalPrice: 15000,
       costPrice: 8000,

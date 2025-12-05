@@ -210,11 +210,13 @@ export default function ProductsPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push(`/sanpham/${data.slug}`)}
+            asChild
             className="text-xs sm:text-sm p-1 sm:p-2"
           >
-            <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden lg:inline ml-1">Xem</span>
+            <a href={`/san-pham/${data.slug}`} target="_blank" rel="noopener noreferrer">
+              <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden lg:inline ml-1">Xem</span>
+            </a>
           </Button>
           <Button
             variant="ghost"
@@ -389,7 +391,7 @@ export default function ProductsPage() {
             <span className="sm:hidden">JSON</span>
           </Button>
           <Button
-            onClick={() => router.push('/admin/products/new')}
+            onClick={() => router.push('/admin/products/create')}
             className="flex-1 sm:flex-none text-xs sm:text-sm"
           >
             <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
@@ -544,7 +546,7 @@ export default function ProductsPage() {
 
       {/* JSON Import Dialog */}
       <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-        <DialogContent className="max-w-4xl w-[95vw] sm:w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="w-screen h-screen max-w-none m-0 rounded-none flex flex-col">
           <DialogHeader>
             <DialogTitle>Import sản phẩm từ JSON</DialogTitle>
             <DialogDescription>
@@ -567,22 +569,6 @@ export default function ProductsPage() {
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Info Alert - Mobile First */}
-      <Alert className="mt-4">
-        <Info className="h-4 w-4" />
-        <AlertDescription className="text-xs sm:text-sm">
-          <strong>Hướng dẫn:</strong> 
-          <ul className="list-disc list-inside mt-2 space-y-1">
-            <li>Click vào header cột để sắp xếp</li>
-            <li>Sử dụng icon filter trên header để lọc theo cột</li>
-            <li>Chọn nhiều sản phẩm và click Delete để xóa hàng loạt</li>
-            <li>Click nút "Columns" để ẩn/hiện cột, ghim cột trái/phải</li>
-            <li>Kéo viền cột để thay đổi kích thước</li>
-            <li>Sử dụng thanh tìm kiếm toàn cục để tìm nhanh</li>
-          </ul>
-        </AlertDescription>
-      </Alert>
     </div>
   );
 }

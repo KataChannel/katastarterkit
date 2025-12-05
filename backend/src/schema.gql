@@ -2265,6 +2265,7 @@ input CreateWebsiteSettingInput {
   category: String!
   createdBy: String
   description: String
+  domain: String = "default"
   group: String
   isActive: Boolean
   isPublic: Boolean
@@ -3313,7 +3314,7 @@ type Mutation {
   createTaskComment(input: CreateTaskCommentInput!): TaskComment!
   createTechnicalSupportMessage(input: CreateTechnicalSupportMessageInput!): TechnicalSupportMessage!
   createTechnicalSupportTicket(input: CreateTechnicalSupportTicketInput!): TechnicalSupportTicket!
-  createWebsiteSetting(input: CreateWebsiteSettingInput!): WebsiteSetting!
+  createWebsiteSetting(domain: String, input: CreateWebsiteSettingInput!): WebsiteSetting!
   createWorkflowComment(input: CreateWorkflowCommentInput!): WorkflowComment!
   createWorkflowInstance(input: CreateWorkflowInstanceInput!): WorkflowInstance!
   createWorkflowStep(input: CreateWorkflowStepInput!): WorkflowStep!
@@ -3395,7 +3396,7 @@ type Mutation {
   deleteTask(id: String!): Boolean!
   deleteTaskMedia(mediaId: String!): Boolean!
   deleteUser(id: String!): Boolean!
-  deleteWebsiteSetting(key: String!): WebsiteSetting!
+  deleteWebsiteSetting(domain: String, key: String!): WebsiteSetting!
   deleteWorkflowStep(id: ID!): Boolean!
   deleteWorkflowTemplate(id: ID!): Boolean!
 
@@ -3654,7 +3655,7 @@ type Mutation {
   updateTemplatePublicity(input: UpdateTemplatePublicityInput!): CustomTemplate!
   updateUser(id: String!, input: UpdateUserInput!): User!
   updateVideoProgress(enrollmentId: ID!, lessonId: ID!, timeSpent: Int!, videoProgress: Float!, watchTime: Int!): LessonProgress!
-  updateWebsiteSetting(input: UpdateWebsiteSettingInput!, key: String!): WebsiteSetting!
+  updateWebsiteSetting(domain: String, input: UpdateWebsiteSettingInput!, key: String!): WebsiteSetting!
   updateWorkflowInstance(id: ID!, input: UpdateWorkflowInstanceInput!): WorkflowInstance!
   updateWorkflowStep(id: ID!, input: UpdateWorkflowStepInput!): WorkflowStep!
   updateWorkflowTemplate(id: ID!, input: UpdateWorkflowTemplateInput!): WorkflowTemplate!
@@ -4426,7 +4427,6 @@ type ProductType {
   isNew: Boolean
   isNewArrival: Boolean!
   isOnSale: Boolean!
-  isOrganic: Boolean
   manufacturer: String
   maxStock: Int
   metaDescription: String
@@ -4758,7 +4758,7 @@ type Query {
   folder(id: ID!): FileFolder!
   folders: [FileFolder!]!
   footerMenus: [MenuHierarchicalDto!]!
-  footerSettings: [WebsiteSetting!]!
+  footerSettings(domain: String): [WebsiteSetting!]!
 
   """Lấy AI provider theo ID"""
   getAIProvider(id: String!): AIProvider
@@ -4880,7 +4880,7 @@ type Query {
   groupBy(model: String!, options: JSON!): [JSON!]!
   hasPassword: Boolean!
   headerMenus: [MenuHierarchicalDto!]!
-  headerSettings: [WebsiteSetting!]!
+  headerSettings(domain: String): [WebsiteSetting!]!
 
   """Hello world query"""
   hello: String!
@@ -4972,7 +4972,7 @@ type Query {
 
   """Get public menu items (no authentication required)"""
   publicMenus(includeChildren: Boolean = true, isActive: Boolean, isVisible: Boolean, orderBy: JSON, skip: Int, take: Int, type: String): [JSON!]!
-  publicWebsiteSettings(category: SettingCategory, group: String, keys: [String!]): [WebsiteSetting!]!
+  publicWebsiteSettings(category: SettingCategory, domain: String, group: String, keys: [String!]): [WebsiteSetting!]!
   quiz(id: String!): Quiz!
   quizAttempt(id: String!): QuizAttempt!
   quizAttempts(quizId: String!): [QuizAttempt!]!
@@ -5089,9 +5089,9 @@ type Query {
 
   """Lấy thống kê lượt truy cập từ Google Analytics"""
   visitorStats: VisitorStatsType!
-  websiteSetting(key: String!): WebsiteSetting
-  websiteSettings(category: SettingCategory, group: String, isActive: Boolean, isPublic: Boolean): [WebsiteSetting!]!
-  websiteSettingsByCategory(category: String!): [WebsiteSetting!]!
+  websiteSetting(domain: String, key: String!): WebsiteSetting
+  websiteSettings(category: SettingCategory, domain: String, group: String, isActive: Boolean, isPublic: Boolean): [WebsiteSetting!]!
+  websiteSettingsByCategory(category: String!, domain: String): [WebsiteSetting!]!
   workflowInstance(id: ID!): WorkflowInstance!
   workflowInstances(initiatedBy: ID, status: String): [WorkflowInstance!]!
   workflowTemplate(id: ID!): WorkflowTemplate!
@@ -6907,7 +6907,6 @@ input UpdateProductInput {
   isNew: Boolean
   isNewArrival: Boolean
   isOnSale: Boolean
-  isOrganic: Boolean
   manufacturer: String
   maxStock: Int
   metaDescription: String
@@ -7344,6 +7343,7 @@ type WebsiteSetting {
   createdAt: DateTime!
   createdBy: String
   description: String
+  domain: String!
   group: String
   id: String!
   isActive: Boolean!

@@ -31,7 +31,7 @@ export async function seedWebsiteSettings() {
     },
     {
       key: 'site.description',
-      value: 'Chuyên cung cấp rau sạch, thực phẩm organic chất lượng cao',
+      value: 'Chuyên cung cấp rau sạch, nông sản chất lượng cao',
       type: 'TEXTAREA',
       category: 'GENERAL',
       label: 'Mô tả Website',
@@ -418,7 +418,7 @@ export async function seedWebsiteSettings() {
     },
     {
       key: 'seo.meta_description',
-      value: 'Chuyên cung cấp rau sạch, thực phẩm organic chất lượng cao tại TPHCM',
+      value: 'Chuyên cung cấp rau sạch, nông sản chất lượng cao tại TPHCM',
       type: 'TEXTAREA',
       category: 'SEO',
       label: 'Meta Description',
@@ -429,7 +429,7 @@ export async function seedWebsiteSettings() {
     },
     {
       key: 'seo.keywords',
-      value: 'rau sạch, thực phẩm organic, nông sản, rau củ quả, TPHCM',
+      value: 'rau sạch, nông sản, rau củ quả, thực phẩm sạch, TPHCM',
       type: 'TEXTAREA',
       category: 'SEO',
       label: 'Keywords',

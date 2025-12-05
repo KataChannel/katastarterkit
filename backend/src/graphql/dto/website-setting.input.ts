@@ -46,6 +46,11 @@ export class CreateWebsiteSettingInput {
   @IsString()
   key: string;
 
+  @Field({ nullable: true, defaultValue: 'default' })
+  @IsString()
+  @IsOptional()
+  domain?: string;
+
   @Field()
   @IsString()
   label: string;

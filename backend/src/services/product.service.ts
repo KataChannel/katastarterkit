@@ -167,7 +167,6 @@ export class ProductService {
       shortDescription, 
       imageUrl, 
       isNew,
-      isOrganic,
       dimensions,
       manufacturer,
       ...data 
@@ -195,7 +194,6 @@ export class ProductService {
 
     // Handle extra fields in attributes
     const extraAttributes: any = {};
-    if (isOrganic !== undefined) extraAttributes.isOrganic = isOrganic;
     if (dimensions !== undefined) extraAttributes.dimensions = dimensions;
     if (manufacturer !== undefined) extraAttributes.manufacturer = manufacturer;
 

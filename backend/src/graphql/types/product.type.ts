@@ -213,9 +213,6 @@ export class ProductType {
   isOnSale: boolean;
 
   @Field({ nullable: true })
-  isOrganic?: boolean; // From attributes
-
-  @Field({ nullable: true })
   dimensions?: string; // From attributes
 
   @Field({ nullable: true })
