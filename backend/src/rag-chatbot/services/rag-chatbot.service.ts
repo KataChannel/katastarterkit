@@ -8,6 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RagContextService } from './rag-context.service';
 import { RagIntentService } from './rag-intent.service';
 import { RagGeminiService } from './rag-gemini.service';
+import { RagTokenOptimizer } from './rag-token-optimizer.service';
 import {
   RAGQuery,
   RAGResponse,
@@ -19,18 +20,24 @@ import {
 @Injectable()
 export class RagChatbotService {
   private readonly logger = new Logger(RagChatbotService.name);
+  
+  // In-memory conversation storage (thay thế Prisma model chưa có)
+  private conversationStore: Map<string, ConversationMessage[]> = new Map();
+  
   private metricsData: {
     totalQueries: number;
     totalResponseTime: number;
     successCount: number;
     intentCounts: Map<string, number>;
     contextTypeCounts: Map<string, number>;
+    totalTokensUsed: number;
   } = {
     totalQueries: 0,
     totalResponseTime: 0,
     successCount: 0,
     intentCounts: new Map(),
     contextTypeCounts: new Map(),
+    totalTokensUsed: 0,
   };
 
   constructor(
@@ -38,10 +45,11 @@ export class RagChatbotService {
     private readonly contextService: RagContextService,
     private readonly intentService: RagIntentService,
     private readonly geminiService: RagGeminiService,
+    private readonly tokenOptimizer: RagTokenOptimizer,
   ) {}
 
   /**
-   * Xử lý câu hỏi RAG
+   * Xử lý câu hỏi RAG với Token Optimization
    */
   async processQuery(query: RAGQuery): Promise<RAGResponse> {
     const startTime = Date.now();
@@ -56,22 +64,26 @@ export class RagChatbotService {
       const contextTypes = query.contextTypes || intent.contextTypes;
 
       // 3. Fetch context data từ database
-      const context = await this.contextService.getContext(contextTypes);
+      const rawContext = await this.contextService.getContext(contextTypes);
 
-      // 4. Bổ sung statistics nếu cần
+      // 4. ⚡ TỐI ƯU: Filter và giới hạn context theo intent
+      const optimizedContext = this.tokenOptimizer.optimizeContext(rawContext, intent);
+
+      // 5. Bổ sung statistics nếu cần
       if (intent.intent === 'query_statistics' || contextTypes.includes('all')) {
         const stats = await this.contextService.getStatistics();
-        (context as any).statistics = stats;
+        (optimizedContext as any).statistics = stats;
       }
 
-      // 5. Generate response từ Gemini
-      const response = await this.geminiService.generateRAGResponse(
+      // 6. Generate response từ Gemini với context đã tối ưu
+      const contextString = this.tokenOptimizer.formatContextCompact(optimizedContext);
+      const response = await this.geminiService.generateRAGResponseWithOptimizedContext(
         query.message,
         intent,
-        context,
+        contextString,
       );
 
-      // 6. Lưu conversation nếu có userId
+      // 7. Lưu conversation nếu có userId
       if (query.userId) {
         await this.saveConversationMessage(
           query.userId,
@@ -82,11 +94,11 @@ export class RagChatbotService {
         );
       }
 
-      // 7. Update metrics
+      // 8. Update metrics với token tracking
       const responseTime = Date.now() - startTime;
-      this.updateMetrics(intent.intent, contextTypes, responseTime, true);
+      this.updateMetrics(intent.intent, contextTypes, responseTime, true, response.tokensUsed);
 
-      this.logger.log(`RAG query processed in ${responseTime}ms`);
+      this.logger.log(`RAG query processed in ${responseTime}ms, ~${response.tokensUsed || 0} tokens`);
       return response;
 
     } catch (error) {
@@ -206,22 +218,13 @@ ${statusSummary}`;
   }
 
   /**
-   * Lấy lịch sử hội thoại của user
+   * Lấy lịch sử hội thoại của user (in-memory storage)
    */
   async getConversationHistory(userId: string, limit: number = 20): Promise<ConversationMessage[]> {
     try {
-      const history = await this.prisma.chatAIHistory.findMany({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-        take: limit,
-      });
-
-      return history.map((h) => ({
-        id: h.id,
-        role: h.sender === 'user' ? 'user' : 'assistant',
-        content: h.message,
-        timestamp: h.createdAt,
-      })) as ConversationMessage[];
+      const history = this.conversationStore.get(userId) || [];
+      // Trả về limit tin nhắn gần nhất
+      return history.slice(-limit).reverse();
     } catch (error) {
       this.logger.error('Error fetching conversation history', error);
       return [];
@@ -233,9 +236,7 @@ ${statusSummary}`;
    */
   async clearConversationHistory(userId: string): Promise<void> {
     try {
-      await this.prisma.chatAIHistory.deleteMany({
-        where: { userId },
-      });
+      this.conversationStore.delete(userId);
       this.logger.log(`Cleared conversation history for user: ${userId}`);
     } catch (error) {
       this.logger.error('Error clearing conversation history', error);
@@ -289,7 +290,7 @@ ${statusSummary}`;
   }
 
   /**
-   * Lưu message vào lịch sử
+   * Lưu message vào lịch sử (in-memory storage)
    */
   private async saveConversationMessage(
     userId: string,
@@ -299,23 +300,28 @@ ${statusSummary}`;
     intent: any,
   ): Promise<void> {
     try {
-      // Lưu tin nhắn user
-      await this.prisma.chatAIHistory.create({
-        data: {
-          userId,
-          message: userMessage,
-          sender: 'user',
-        },
+      // Lấy hoặc tạo conversation history cho user
+      const history = this.conversationStore.get(userId) || [];
+      
+      // Thêm tin nhắn user
+      history.push({
+        id: `${userId}-${Date.now()}-user`,
+        role: 'user' as const,
+        content: userMessage,
+        timestamp: new Date(),
       });
 
-      // Lưu tin nhắn assistant
-      await this.prisma.chatAIHistory.create({
-        data: {
-          userId,
-          message: assistantMessage,
-          sender: 'assistant',
-        },
+      // Thêm tin nhắn assistant
+      history.push({
+        id: `${userId}-${Date.now()}-assistant`,
+        role: 'assistant' as const,
+        content: assistantMessage,
+        timestamp: new Date(),
       });
+      
+      // Giới hạn 100 tin nhắn gần nhất
+      const trimmedHistory = history.slice(-100);
+      this.conversationStore.set(userId, trimmedHistory);
     } catch (error) {
       this.logger.warn('Failed to save conversation message', error);
     }
@@ -329,12 +335,18 @@ ${statusSummary}`;
     contextTypes: string[],
     responseTime: number,
     success: boolean,
+    tokensUsed?: number,
   ): void {
     this.metricsData.totalQueries++;
     this.metricsData.totalResponseTime += responseTime;
     
     if (success) {
       this.metricsData.successCount++;
+    }
+
+    // Track tokens used
+    if (tokensUsed) {
+      this.metricsData.totalTokensUsed += tokensUsed;
     }
 
     // Update intent counts
@@ -346,5 +358,17 @@ ${statusSummary}`;
       const currentCount = this.metricsData.contextTypeCounts.get(type) || 0;
       this.metricsData.contextTypeCounts.set(type, currentCount + 1);
     }
+  }
+
+  /**
+   * Get token usage stats
+   */
+  getTokenStats(): { totalTokens: number; avgTokensPerQuery: number } {
+    return {
+      totalTokens: this.metricsData.totalTokensUsed,
+      avgTokensPerQuery: this.metricsData.totalQueries > 0 
+        ? Math.round(this.metricsData.totalTokensUsed / this.metricsData.totalQueries)
+        : 0,
+    };
   }
 }

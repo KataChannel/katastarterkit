@@ -110,6 +110,7 @@ export interface RAGResponse {
   contextUsed: ContextType[];
   confidence: number;
   suggestedQueries?: string[];
+  tokensUsed?: number; // Ước tính số token đã dùng
 }
 
 export interface RAGSource {

@@ -13,6 +13,7 @@ import {
   RagContextService,
   RagIntentService,
   RagGeminiService,
+  RagTokenOptimizer,
 } from './services';
 
 // Controller & Resolver
@@ -30,6 +31,7 @@ import { RagChatbotResolver } from './rag-chatbot.resolver';
     RagContextService,
     RagIntentService,
     RagGeminiService,
+    RagTokenOptimizer,  // Token optimization service
     RagChatbotService,
     
     // GraphQL Resolver
@@ -40,6 +42,7 @@ import { RagChatbotResolver } from './rag-chatbot.resolver';
     RagContextService,
     RagIntentService,
     RagGeminiService,
+    RagTokenOptimizer,
   ],
 })
 export class RagChatbotModule {}
