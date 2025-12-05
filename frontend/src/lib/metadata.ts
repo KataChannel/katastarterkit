@@ -6,7 +6,7 @@ import { Metadata } from 'next';
 async function fetchSEOSettings(): Promise<Record<string, string>> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:3000'}/graphql`,
+      `${process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:12001'}/graphql`,
       {
         method: 'POST',
         headers: {

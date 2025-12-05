@@ -21,7 +21,7 @@ interface AuthenticatedSocket extends Socket {
 @Injectable()
 @WebSocketGateway({
   cors: {
-    origin: process.env.NODE_ENV === 'development' ? /.*/: (process.env.FRONTEND_URL || 'http://localhost:3000'),
+    origin: process.env.NODE_ENV === 'development' ? /.*/: (process.env.FRONTEND_URL || 'http://localhost:12000'),
     credentials: true,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],

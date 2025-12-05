@@ -41,8 +41,8 @@ interface SupportChatWidgetProps {
 }
 
 export default function SupportChatWidget({
-  apiUrl = 'http://localhost:3001',
-  websocketUrl = 'http://localhost:3001/support-chat',
+  apiUrl = 'http://localhost:12001',
+  websocketUrl = 'http://localhost:12001/support-chat',
   primaryColor = '#2563eb',
   position = 'bottom-right',
 }: SupportChatWidgetProps) {

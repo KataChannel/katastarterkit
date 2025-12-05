@@ -67,7 +67,7 @@ describe('Real-time Comments Subscription', () => {
     cy.visit('/dashboard');
     
     // Mock WebSocket connection failure
-    cy.intercept('ws://localhost:14000/graphql', { forceNetworkError: true });
+    cy.intercept('ws://localhost:12001/graphql', { forceNetworkError: true });
     
     // Wait for error handling
     cy.wait(3000);

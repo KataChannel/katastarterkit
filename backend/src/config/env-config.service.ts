@@ -15,7 +15,7 @@ export class EnvConfigService {
   }
 
   get frontendUrl(): string {
-    return this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
+    return this.configService.get<string>('FRONTEND_URL', 'http://localhost:12000');
   }
 
   // Database

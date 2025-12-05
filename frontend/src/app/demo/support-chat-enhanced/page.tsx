@@ -97,8 +97,8 @@ export default function ExamplePage() {
 
       {/* Chat Widget */}
       <SupportChatWidgetEnhanced
-        apiUrl={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}
-        websocketUrl={process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001/support-chat'}
+        apiUrl={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:12001'}
+        websocketUrl={process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:12001/support-chat'}
         primaryColor="#2563eb"
         position="bottom-right"
         enableZaloLogin={true}

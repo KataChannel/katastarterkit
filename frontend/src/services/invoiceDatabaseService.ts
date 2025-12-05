@@ -11,7 +11,7 @@ export interface DatabaseSyncResult {
 }
 
 export class InvoiceDatabaseService {
-  private static readonly API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  private static readonly API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:12001/api';
 
   /**
    * Map API invoice data to database format
@@ -405,7 +405,7 @@ export class InvoiceDatabaseService {
   ): Promise<DatabaseSyncResult> {
     try {
       // Get GraphQL endpoint
-      const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3001/graphql';
+      const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:12001/graphql';
       
       console.log(`Syncing ${apiInvoices.length} invoices via GraphQL with Bearer Token: ${bearerToken ? 'Yes' : 'No'}`);
 

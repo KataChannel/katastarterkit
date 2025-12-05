@@ -74,7 +74,7 @@ export class CertificatesService {
         courseName: enrollment.course.title,
         instructorName: `${enrollment.course.instructor.firstName || ''} ${enrollment.course.instructor.lastName || enrollment.course.instructor.username}`.trim(),
         completionDate: enrollment.completedAt || new Date(),
-        verificationUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-certificate/${certificateNumber}`,
+        verificationUrl: `${process.env.FRONTEND_URL || 'http://localhost:12000'}/verify-certificate/${certificateNumber}`,
       },
       include: {
         user: {

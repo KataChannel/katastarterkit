@@ -33,8 +33,8 @@ async function bootstrap() {
   // Log environment configuration using ConfigService directly
   console.log('🔧 Environment Configuration:');
   console.log(`   NODE_ENV: ${configService.get('NODE_ENV', 'development')}`);
-  console.log(`   PORT: ${configService.get('PORT', 4000)}`);
-  console.log(`   FRONTEND_URL: ${configService.get('FRONTEND_URL', 'http://localhost:3000')}`);
+  console.log(`   PORT: ${configService.get('PORT', 12001)}`);
+  console.log(`   FRONTEND_URL: ${configService.get('FRONTEND_URL', 'http://localhost:12000')}`);
   
   // Configure JSON body parser with larger limit for GraphQL (MUST be BEFORE graphqlUploadExpress)
   app.use(express.json({ limit: '50mb' }));
@@ -51,7 +51,7 @@ async function bootstrap() {
   app.use('/logs', express.static(join(__dirname, '../public')));
   
   // Enable CORS with support for multiple origins and IP addresses
-  const frontendUrl = configService.get('FRONTEND_URL', 'http://localhost:3000');
+  const frontendUrl = configService.get('FRONTEND_URL', 'http://localhost:12000');
   const corsOrigins = [
     'http://localhost:3000',
     'http://localhost:12000',
