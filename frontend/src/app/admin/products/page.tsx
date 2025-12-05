@@ -21,6 +21,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Plus,
   Edit,
   Trash2,
@@ -34,6 +41,8 @@ import {
   DollarSign,
   AlertCircle,
   FileText,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useActiveCategories } from '@/hooks/useCategories';
 import { toast } from 'sonner';
@@ -293,6 +302,27 @@ export default function ProductsPage() {
     setFilters(prev => ({ ...prev, filters: graphqlFilters, page: 1 }));
   }, [categories]);
 
+  // Handle global search (server-side) - hỗ trợ tiếng Việt có dấu và không dấu
+  const handleGlobalSearch = useCallback((searchTerm: string) => {
+    setFilters(prev => ({
+      ...prev,
+      filters: {
+        ...prev.filters,
+        search: searchTerm.trim() || undefined,
+      },
+      page: 1, // Reset về trang 1 khi tìm kiếm
+    }));
+  }, []);
+
+  // Handle pagination
+  const handlePageChange = useCallback((newPage: number) => {
+    setFilters(prev => ({ ...prev, page: newPage }));
+  }, []);
+
+  const handlePageSizeChange = useCallback((newLimit: string) => {
+    setFilters(prev => ({ ...prev, limit: parseInt(newLimit), page: 1 }));
+  }, []);
+
   // Handle advanced table sorting
   const handleTableSort = useCallback((sortConfigs: SortConfig[]) => {
     if (sortConfigs.length > 0) {
@@ -470,11 +500,63 @@ export default function ProductsPage() {
               onRowDelete={handleBulkDelete}
               onFilter={handleTableFilter}
               onSort={handleTableSort}
+              onGlobalSearchChange={handleGlobalSearch}
+              disableClientSideSearch={true}
               height={600}
               className="w-full"
             />
           )}
         </CardContent>
+        
+        {/* Pagination - Server Side */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Hiển thị</span>
+            <Select
+              value={String(filters.limit)}
+              onValueChange={handlePageSizeChange}
+            >
+              <SelectTrigger className="w-[70px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+                <SelectItem value="200">200</SelectItem>
+              </SelectContent>
+            </Select>
+            <span>trên tổng số {pagination.total} sản phẩm</span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(pagination.page - 1)}
+              disabled={pagination.page <= 1 || loading}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span className="hidden sm:inline ml-1">Trước</span>
+            </Button>
+            
+            <div className="flex items-center gap-1 px-2">
+              <span className="text-sm font-medium">
+                Trang {pagination.page} / {pagination.totalPages || 1}
+              </span>
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(pagination.page + 1)}
+              disabled={pagination.page >= pagination.totalPages || loading}
+            >
+              <span className="hidden sm:inline mr-1">Sau</span>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
       </Card>
 
       {/* Delete Confirmation Dialog */}

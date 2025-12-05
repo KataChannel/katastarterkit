@@ -10,6 +10,7 @@ import {
   UpdateProductVariantInput,
 } from '../graphql/inputs/product.input';
 import { Prisma } from '@prisma/client';
+import { createVietnameseSearchPatterns, removeVietnameseDiacritics } from '../utils/vietnamese.util';
 
 @Injectable()
 export class ProductService {
@@ -136,9 +137,13 @@ export class ProductService {
       throw new NotFoundException(`Category with ID ${input.categoryId} not found`);
     }
 
+    // Tạo nameNormalized từ name để hỗ trợ tìm kiếm tiếng Việt không dấu
+    const nameNormalized = removeVietnameseDiacritics(input.name).toLowerCase();
+
     return this.prisma.product.create({
       data: {
         ...input,
+        nameNormalized,
       },
       include: {
         category: true,
@@ -255,6 +260,11 @@ export class ProductService {
       if (!category) {
         throw new NotFoundException(`Category with ID ${data.categoryId} not found`);
       }
+    }
+
+    // Cập nhật nameNormalized nếu name thay đổi
+    if (data.name) {
+      data.nameNormalized = removeVietnameseDiacritics(data.name).toLowerCase();
     }
 
     return this.prisma.product.update({
@@ -382,14 +392,30 @@ export class ProductService {
     const where: Prisma.ProductWhereInput = {};
 
     // Only apply search filter if search string is not empty
+    // Hỗ trợ tìm kiếm tiếng Việt có dấu và không dấu
     if (filters.search && filters.search.trim().length > 0) {
       const searchTerm = filters.search.trim();
-      console.log('[ProductService] Search query:', searchTerm);
-      where.OR = [
+      const searchNormalized = removeVietnameseDiacritics(searchTerm).toLowerCase();
+      
+      console.log('[ProductService] Search term:', searchTerm);
+      console.log('[ProductService] Search normalized:', searchNormalized);
+      
+      // Tạo điều kiện OR cho tìm kiếm:
+      // 1. Tìm trong name với từ khóa gốc (có dấu hoặc không dấu)
+      // 2. Tìm trong nameNormalized với từ khóa đã normalize
+      // 3. Tìm trong các trường khác
+      const searchConditions: Prisma.ProductWhereInput[] = [
+        // Tìm trong name với từ khóa gốc
         { name: { contains: searchTerm, mode: 'insensitive' } },
+        // Tìm trong nameNormalized với từ khóa đã normalize (cho phép tìm không dấu)
+        { nameNormalized: { contains: searchNormalized, mode: 'insensitive' } },
+        // Tìm trong các trường khác
         { description: { contains: searchTerm, mode: 'insensitive' } },
         { sku: { contains: searchTerm, mode: 'insensitive' } },
+        { slug: { contains: searchNormalized, mode: 'insensitive' } },
       ];
+      
+      where.OR = searchConditions;
     }
 
     if (filters.categoryId) {

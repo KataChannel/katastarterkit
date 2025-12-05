@@ -1,4 +1,5 @@
 import { FilterCondition, SortConfig, ColumnDef, RowData } from './types';
+import { removeVietnameseDiacritics } from '@/lib/vietnamese';
 
 export class TableUtils {
   // Sorting utilities
@@ -120,15 +121,21 @@ export class TableUtils {
     return null;
   }
 
-  // Search utilities
+  // Search utilities - Hỗ trợ tìm kiếm tiếng Việt có dấu và không dấu
   static globalSearch<T extends RowData>(data: T[], searchTerm: string, columns: ColumnDef<T>[]): T[] {
     if (!searchTerm.trim()) return data;
 
     const term = searchTerm.toLowerCase();
+    const normalizedTerm = removeVietnameseDiacritics(term);
+    
     return data.filter(row => {
       return columns.some(column => {
         const value = row[column.field];
-        return String(value).toLowerCase().includes(term);
+        const stringValue = String(value || '').toLowerCase();
+        const normalizedValue = removeVietnameseDiacritics(stringValue);
+        
+        // Tìm kiếm cả text gốc và text đã normalize
+        return stringValue.includes(term) || normalizedValue.includes(normalizedTerm);
       });
     });
   }

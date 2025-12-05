@@ -131,8 +131,9 @@ export class MinioService implements OnModuleInit {
   }
 
   /**
-   * Chuyển tên file sang dạng slug
-   * Ví dụ: "Hình ảnh số 1.png" -> "hinh-anh-so-1.png"
+   * Chuyển tên file sang dạng slug SEO-friendly với unique suffix
+   * Ví dụ: "Hình ảnh số 1.png" -> "hinh-anh-so-1-x2k9ab.png"
+   * Format: slug-name-uniqueId.ext (tối ưu SEO + đảm bảo unique)
    */
   private slugifyFileName(originalName: string): string {
     // Tách phần tên và extension
@@ -152,15 +153,26 @@ export class MinioService implements OnModuleInit {
       .replace(/^-+|-+$/g, '')       // Xóa dấu - ở đầu và cuối
       .replace(/-+/g, '-');          // Gộp nhiều dấu - liên tiếp thành 1
     
-    // Giới hạn độ dài tên file
-    if (name.length > 100) {
-      name = name.substring(0, 100);
+    // Giới hạn độ dài tên file (để còn chỗ cho uniqueId)
+    if (name.length > 80) {
+      name = name.substring(0, 80);
     }
     
-    // Thêm timestamp để đảm bảo unique
-    const timestamp = Date.now();
+    // Tạo unique suffix ngắn (6 ký tự) - SEO-friendly hơn timestamp dài
+    const uniqueSuffix = this.generateShortUniqueId();
     
-    return ext ? `${name}-${timestamp}.${ext.toLowerCase()}` : `${name}-${timestamp}`;
+    return ext ? `${name}-${uniqueSuffix}.${ext.toLowerCase()}` : `${name}-${uniqueSuffix}`;
+  }
+
+  /**
+   * Tạo unique ID ngắn (6 ký tự) cho tên file
+   * Format: 3 ký tự từ timestamp base36 + 3 ký tự random
+   * Ví dụ: "x2k9ab"
+   */
+  private generateShortUniqueId(): string {
+    const timestampPart = Date.now().toString(36).slice(-3); // 3 ký tự cuối của timestamp base36
+    const randomPart = Math.random().toString(36).substring(2, 5); // 3 ký tự random
+    return `${timestampPart}${randomPart}`;
   }
 
   /**
@@ -381,17 +393,22 @@ export class MinioService implements OnModuleInit {
       // Lấy extension từ file hiện tại
       const oldExt = oldFileName?.split('.').pop() || 'webp';
       
-      // Chuyển tên file mới sang slug
+      // Chuyển tên file mới sang slug SEO-friendly
       const slugNewFileName = this.vietnameseToSlug(newFileName)
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '')
         .replace(/-+/g, '-');
       
-      // Tạo tên file mới với extension
-      const finalNewFileName = newFileName.includes('.') 
-        ? slugNewFileName 
-        : `${slugNewFileName}.${oldExt}`;
+      // Tạo unique suffix ngắn (6 ký tự) để đảm bảo tên file duy nhất
+      const uniqueSuffix = this.generateShortUniqueId();
+      
+      // Tạo tên file mới với format: slug-uniqueId.ext (SEO-friendly + unique)
+      const baseFileName = newFileName.includes('.') 
+        ? slugNewFileName.replace(/\.[^.]+$/, '') // Bỏ extension nếu có
+        : slugNewFileName;
+      
+      const finalNewFileName = `${baseFileName}-${uniqueSuffix}.${oldExt}`;
       
       const newPath = `${folder}/${finalNewFileName}`;
       

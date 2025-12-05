@@ -2972,13 +2972,14 @@ model Customer {
 
 // Product Model - Sản phẩm
 model Product {
-  id          String  @id @default(uuid())
-  name        String // title (tiếng Việt)
-  nameEn      String? // title2 (tiếng Anh) 
-  slug        String  @unique
-  description String?
-  shortDesc   String? // Mô tả ngắn
-  subtitle    String? // subtitle từ schema nội bộ
+  id            String  @id @default(uuid())
+  name          String // title (tiếng Việt)
+  nameNormalized String? // Tên không dấu để hỗ trợ tìm kiếm tiếng Việt
+  nameEn        String? // title2 (tiếng Anh) 
+  slug          String  @unique
+  description   String?
+  shortDesc     String? // Mô tả ngắn
+  subtitle      String? // subtitle từ schema nội bộ
 
   // Mã sản phẩm (từ schema nội bộ)
   productCode String? @unique @map("masp") // Product code
@@ -3067,6 +3068,7 @@ model Product {
   @@index([isOnSale])
   @@index([price])
   @@index([publishedAt])
+  @@index([nameNormalized])
   @@map("products")
 }
 

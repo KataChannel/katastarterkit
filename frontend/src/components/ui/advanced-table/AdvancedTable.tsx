@@ -49,6 +49,8 @@ export function AdvancedTable<T extends RowData>({
   onRowDelete,
   onSort,
   onFilter,
+  onGlobalSearchChange,
+  disableClientSideSearch = false,
   className,
   height = 600
 }: AdvancedTableProps<T>) {
@@ -97,23 +99,34 @@ export function AdvancedTable<T extends RowData>({
   const processedData = useMemo(() => {
     let result = [...data];
 
-    // Apply global search
-    if (globalSearch) {
+    // Apply global search (chỉ khi không dùng server-side search)
+    if (globalSearch && !disableClientSideSearch) {
       result = TableUtils.globalSearch(result, globalSearch, columns);
     }
 
-    // Apply filters
-    if (filters.length > 0) {
+    // Apply filters (chỉ khi không có onFilter callback - server-side)
+    if (filters.length > 0 && !onFilter) {
       result = TableUtils.applyFiltering(result, filters);
     }
 
-    // Apply sorting
-    if (sortConfigs.length > 0) {
+    // Apply sorting (chỉ khi không có onSort callback - server-side)
+    if (sortConfigs.length > 0 && !onSort) {
       result = TableUtils.applySorting(result, sortConfigs);
     }
 
     return result;
-  }, [data, globalSearch, filters, sortConfigs, columns]);
+  }, [data, globalSearch, filters, sortConfigs, columns, disableClientSideSearch, onFilter, onSort]);
+
+  // Notify parent of global search changes (for server-side search)
+  useEffect(() => {
+    if (onGlobalSearchChange) {
+      const timeoutId = setTimeout(() => {
+        onGlobalSearchChange(globalSearch);
+      }, 300); // Debounce 300ms để tránh gọi quá nhiều
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [globalSearch, onGlobalSearchChange]);
 
   // Notify parent of selection changes (outside render cycle)
   useEffect(() => {

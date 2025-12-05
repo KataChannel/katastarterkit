@@ -92,6 +92,8 @@ export interface AdvancedTableProps<T extends RowData = RowData> {
   onRowDelete?: (rows: T[]) => Promise<boolean>;
   onSort?: (sortConfigs: SortConfig[]) => void;
   onFilter?: (filters: FilterCondition[]) => void;
+  onGlobalSearchChange?: (searchTerm: string) => void; // Callback cho server-side search
+  disableClientSideSearch?: boolean; // Tắt tìm kiếm client-side khi dùng server-side
   className?: string;
   height?: number;
 }
