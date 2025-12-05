@@ -15,6 +15,7 @@ interface FilterBarProps<T> {
   onFiltersChange: (filters: FilterCondition[]) => void;
   globalSearch: string;
   onGlobalSearchChange: (search: string) => void;
+  compact?: boolean; // New prop for inline mode (no search input, just filter button + badges)
 }
 
 const OPERATORS = {
@@ -50,7 +51,8 @@ export function FilterBar<T>({
   filters, 
   onFiltersChange, 
   globalSearch, 
-  onGlobalSearchChange 
+  onGlobalSearchChange,
+  compact = false
 }: FilterBarProps<T>) {
   const [isAddingFilter, setIsAddingFilter] = useState(false);
   const [newFilter, setNewFilter] = useState<Partial<FilterCondition>>({});
@@ -228,39 +230,33 @@ export function FilterBar<T>({
     );
   };
 
-  return (
-    <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border-b bg-gray-50">
-      {/* Global Search - Responsive */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
-        <Input
-          placeholder="Global search..."
-          value={globalSearch}
-          onChange={(e) => onGlobalSearchChange(e.target.value)}
-          className="flex-1 sm:max-w-md text-sm"
-        />
-        
+  // Compact mode - only filter button + badges (search is handled externally)
+  if (compact) {
+    return (
+      <>
+        {/* Add Filter Button */}
         <Popover open={isAddingFilter} onOpenChange={handleClosePopover}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
-              <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              Add Filter
+            <Button variant="outline" size="sm" className="h-8 px-2 text-xs">
+              <Filter className="w-3.5 h-3.5 mr-1" />
+              <span className="hidden sm:inline">Filter</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[95vw] sm:w-96 max-w-md">
-            <div className="space-y-3 sm:space-y-4">
-              <h4 className="font-medium text-sm sm:text-base">Add Filter</h4>
+          <PopoverContent className="w-80">
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm">Add Filter</h4>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <Select
                   value={newFilter.field}
                   onValueChange={(value) => setNewFilter({ ...newFilter, field: value, operator: undefined, value: undefined })}
                 >
-                  <SelectTrigger className="text-xs sm:text-sm">
+                  <SelectTrigger className="text-xs h-8">
                     <SelectValue placeholder="Column" />
                   </SelectTrigger>
                   <SelectContent>
                     {filterableColumns.map(col => (
-                      <SelectItem key={String(col.field)} value={String(col.field)} className="text-xs sm:text-sm">
+                      <SelectItem key={String(col.field)} value={String(col.field)} className="text-xs">
                         {col.headerName}
                       </SelectItem>
                     ))}
@@ -272,12 +268,12 @@ export function FilterBar<T>({
                     value={newFilter.operator}
                     onValueChange={(value) => setNewFilter({ ...newFilter, operator: value as any, value: undefined })}
                   >
-                    <SelectTrigger className="text-xs sm:text-sm">
+                    <SelectTrigger className="text-xs h-8">
                       <SelectValue placeholder="Operator" />
                     </SelectTrigger>
                     <SelectContent>
                       {getOperators(getColumnType(newFilter.field)).map(op => (
-                        <SelectItem key={op.value} value={op.value} className="text-xs sm:text-sm">
+                        <SelectItem key={op.value} value={op.value} className="text-xs">
                           {op.label}
                         </SelectItem>
                       ))}
@@ -292,12 +288,12 @@ export function FilterBar<T>({
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row justify-end gap-2">
+              <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setIsAddingFilter(false)}
-                  className="w-full sm:w-auto text-xs sm:text-sm"
+                  className="h-7 text-xs"
                 >
                   Cancel
                 </Button>
@@ -305,7 +301,7 @@ export function FilterBar<T>({
                   size="sm"
                   onClick={addFilter}
                   disabled={!newFilter.field || !newFilter.operator || newFilter.value === undefined || newFilter.value === ''}
-                  className="w-full sm:w-auto text-xs sm:text-sm"
+                  className="h-7 text-xs"
                 >
                   Add
                 </Button>
@@ -313,45 +309,158 @@ export function FilterBar<T>({
             </div>
           </PopoverContent>
         </Popover>
-      </div>
 
-      {/* Active Filters - Responsive */}
-      {filters.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
-          <span className="text-xs sm:text-sm text-gray-600 flex items-center flex-shrink-0">
-            <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-            Filters:
-          </span>
-          {filters.map((filter, index) => {
-            const column = columns.find(col => col.field === filter.field);
-            return (
-              <Badge key={index} variant="secondary" className="flex items-center gap-1 text-[10px] sm:text-xs">
-                <span className="font-medium">{column?.headerName}</span>
-                <span className="opacity-75 hidden sm:inline">
-                  {OPERATORS[getColumnType(filter.field)]?.find(op => op.value === filter.operator)?.label}
-                </span>
-                <span className="truncate max-w-[80px] sm:max-w-none">{String(filter.value)}</span>
-                {filter.value2 && <span className="hidden sm:inline">- {String(filter.value2)}</span>}
-                <button
-                  onClick={() => removeFilter(index)}
-                  className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
-                >
-                  <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                </button>
-              </Badge>
-            );
-          })}
-          {filters.length > 0 && (
+        {/* Active Filters - Inline */}
+        {filters.length > 0 && (
+          <>
+            {filters.map((filter, index) => {
+              const column = columns.find(col => col.field === filter.field);
+              return (
+                <Badge key={index} variant="secondary" className="flex items-center gap-1 text-xs h-7">
+                  <span className="font-medium">{column?.headerName}</span>
+                  <span className="truncate max-w-[60px]">{String(filter.value)}</span>
+                  <button
+                    onClick={() => removeFilter(index)}
+                    className="ml-0.5 hover:bg-gray-300 rounded-full p-0.5"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              );
+            })}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onFiltersChange([])}
-              className="h-5 sm:h-6 px-1.5 sm:px-2 text-[10px] sm:text-xs"
+              className="h-7 px-1 text-xs text-gray-500 hover:text-gray-700"
             >
-              Clear All
+              <X className="w-3 h-3" />
             </Button>
-          )}
-        </div>
+          </>
+        )}
+      </>
+    );
+  }
+
+  // Full mode (standalone FilterBar)
+  return (
+    <div className="flex items-center gap-2 p-2 border-b bg-gray-50 flex-wrap">
+      {/* Global Search - Compact */}
+      <Input
+        placeholder="Global search..."
+        value={globalSearch}
+        onChange={(e) => onGlobalSearchChange(e.target.value)}
+        className="h-8 w-48 sm:w-64 text-sm"
+      />
+      
+      {/* Add Filter Button */}
+      <Popover open={isAddingFilter} onOpenChange={handleClosePopover}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm" className="h-8 px-2 text-xs">
+            <Plus className="w-3.5 h-3.5 mr-1" />
+            <span className="hidden sm:inline">Add Filter</span>
+            <span className="sm:hidden">Filter</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80">
+          <div className="space-y-3">
+            <h4 className="font-medium text-sm">Add Filter</h4>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <Select
+                value={newFilter.field}
+                onValueChange={(value) => setNewFilter({ ...newFilter, field: value, operator: undefined, value: undefined })}
+              >
+                <SelectTrigger className="text-xs h-8">
+                  <SelectValue placeholder="Column" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filterableColumns.map(col => (
+                    <SelectItem key={String(col.field)} value={String(col.field)} className="text-xs">
+                      {col.headerName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {newFilter.field && (
+                <Select
+                  value={newFilter.operator}
+                  onValueChange={(value) => setNewFilter({ ...newFilter, operator: value as any, value: undefined })}
+                >
+                  <SelectTrigger className="text-xs h-8">
+                    <SelectValue placeholder="Operator" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getOperators(getColumnType(newFilter.field)).map(op => (
+                      <SelectItem key={op.value} value={op.value} className="text-xs">
+                        {op.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            {newFilter.field && newFilter.operator && (
+              <div>
+                {renderNewFilterValue()}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsAddingFilter(false)}
+                className="h-7 text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={addFilter}
+                disabled={!newFilter.field || !newFilter.operator || newFilter.value === undefined || newFilter.value === ''}
+                className="h-7 text-xs"
+              >
+                Add
+              </Button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      {/* Active Filters - Inline */}
+      {filters.length > 0 && (
+        <>
+          <div className="h-4 w-px bg-gray-300 mx-1" />
+          {filters.map((filter, index) => {
+            const column = columns.find(col => col.field === filter.field);
+            return (
+              <Badge key={index} variant="secondary" className="flex items-center gap-1 text-xs h-7">
+                <span className="font-medium">{column?.headerName}</span>
+                <span className="opacity-75 hidden sm:inline">
+                  {OPERATORS[getColumnType(filter.field)]?.find(op => op.value === filter.operator)?.label}
+                </span>
+                <span className="truncate max-w-[60px]">{String(filter.value)}</span>
+                <button
+                  onClick={() => removeFilter(index)}
+                  className="ml-0.5 hover:bg-gray-300 rounded-full p-0.5"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            );
+          })}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onFiltersChange([])}
+            className="h-7 px-2 text-xs text-gray-500 hover:text-gray-700"
+          >
+            Clear
+          </Button>
+        </>
       )}
     </div>
   );

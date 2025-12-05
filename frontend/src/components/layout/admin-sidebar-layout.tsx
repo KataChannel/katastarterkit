@@ -330,6 +330,16 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
 
               {/* Right side actions */}
               <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" asChild className="gap-2">
+                  <Link href="/" target="_blank" rel="noopener noreferrer">
+                  <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+                    <path d="M2 12h20"/>
+                  </svg>
+                  <span className="hidden sm:inline">Xem Website</span>
+                  </Link>
+                </Button>
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="h-5 w-5" />
                   <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />

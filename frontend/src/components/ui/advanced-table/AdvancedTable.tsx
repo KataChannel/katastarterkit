@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -367,13 +368,37 @@ export function AdvancedTable<T extends RowData>({
       isFullscreen && 'fixed inset-0 z-50 rounded-none',
       className
     )}>
-      {/* Toolbar - Single Row Optimized */}
-      {showToolbar && (
-        <div className="flex items-center justify-between gap-2 p-2 border-b bg-gray-50">
-          {/* Left: Selection info + Actions */}
-          <div className="flex items-center gap-2 min-w-0">
+      {/* Combined Toolbar + Filter Bar - Single Row */}
+      {(showToolbar || enableFiltering) && (
+        <div className="flex items-center gap-2 p-2 border-b bg-gray-50">
+          {/* Left: Search + Filter + Selection Actions */}
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {/* Global Search */}
+            {enableFiltering && (
+              <Input
+                placeholder="Tìm kiếm..."
+                value={globalSearch}
+                onChange={(e) => setGlobalSearch(e.target.value)}
+                className="h-8 w-40 sm:w-52 text-sm"
+              />
+            )}
+            
+            {/* Add Filter */}
+            {enableFiltering && (
+              <FilterBar
+                columns={columns}
+                filters={filters}
+                onFiltersChange={handleFiltersChange}
+                globalSearch={globalSearch}
+                onGlobalSearchChange={setGlobalSearch}
+                compact={true}
+              />
+            )}
+            
+            {/* Selection Actions */}
             {enableRowSelection && selectedRows.size > 0 && (
               <>
+                <div className="h-4 w-px bg-gray-300 mx-1 hidden sm:block" />
                 <Badge variant="secondary" className="text-xs whitespace-nowrap">
                   {selectedRows.size} selected
                 </Badge>
@@ -397,7 +422,7 @@ export function AdvancedTable<T extends RowData>({
           </div>
           
           {/* Right: Tools */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <Button variant="outline" size="sm" onClick={handleExport} className="h-8 px-2 text-xs">
               <Download className="w-3.5 h-3.5 mr-1" />
               <span className="hidden sm:inline">Export</span>
@@ -432,24 +457,13 @@ export function AdvancedTable<T extends RowData>({
         </div>
       )}
 
-      {/* Filter Bar */}
-      {enableFiltering && (
-        <FilterBar
-          columns={columns}
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          globalSearch={globalSearch}
-          onGlobalSearchChange={setGlobalSearch}
-        />
-      )}
-
       {/* Google Sheets Style Table - Full Width with Fixed Header + Frozen Columns */}
       <div 
         className="relative overflow-auto flex-1"
         style={{ 
           height: isFullscreen 
-            ? `calc(100vh - ${(showToolbar ? 48 : 0) + (enableFiltering ? 56 : 0)}px)` 
-            : height - (showToolbar ? 48 : 0) - (enableFiltering ? 56 : 0) 
+            ? `calc(100vh - 48px)` 
+            : height - 48
         }}
       >
         {/* Sticky Header Container - Full Width */}
