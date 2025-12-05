@@ -70,7 +70,7 @@ const collectErrorContext = () => {
 
 // HTTP Link
 const getGraphQLUri = () => {
-  let endpoint = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:14000/graphql';
+  let endpoint = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:12001/graphql';
   
   // In browser environment, if page is loaded via HTTPS but endpoint is HTTP, fix it
   if (typeof window !== 'undefined') {

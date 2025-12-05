@@ -5,8 +5,8 @@ export async function POST(req: NextRequest) {
     const { dryRun = false, limit = 10 } = await req.json();
 
     // Call backend API to run normalization
-    let graphqlEndpoint = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:14000/graphql';
-    const backendUrl = graphqlEndpoint.replace('/graphql', '') || 'http://localhost:4000';
+    let graphqlEndpoint = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:12001/graphql';
+    const backendUrl = graphqlEndpoint.replace('/graphql', '') || 'http://localhost:12001';
     
     const response = await fetch(`${backendUrl}/api/ketoan/normalize-products`, {
       method: 'POST',

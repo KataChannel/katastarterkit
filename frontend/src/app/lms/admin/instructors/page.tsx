@@ -224,7 +224,7 @@ export default function AdminInstructorsPage() {
     try {
       // Gọi assignRoleToUser mutation
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:13001/graphql', {
+      const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:12001/graphql', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -307,7 +307,7 @@ export default function AdminInstructorsPage() {
       }
 
       // Gọi GraphQL mutation removeRoleFromUser
-      const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:13001/graphql';
+      const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:12001/graphql';
       
       const response = await fetch(graphqlUrl, {
         method: 'POST',

@@ -248,7 +248,7 @@ export default function DocumentDetailPage() {
     formDataUpload.append('file', file);
 
     const token = localStorage.getItem('accessToken');
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:13001';
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:12001';
     
     const response = await fetch(`${backendUrl}/api/lms/source-documents/${params.id}/upload`, {
       method: 'POST',

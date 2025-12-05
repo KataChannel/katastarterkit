@@ -210,7 +210,7 @@ export default function FileUpload({
         onError?.(errorMsg);
       });
 
-      let graphqlEndpoint = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:14000/graphql';
+      let graphqlEndpoint = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:12001/graphql';
       
       // If current page is HTTPS but endpoint is HTTP, upgrade to HTTPS
       if (typeof window !== 'undefined' && window.location.protocol === 'https:' && graphqlEndpoint.startsWith('http://')) {

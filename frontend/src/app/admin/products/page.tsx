@@ -50,7 +50,7 @@ import { toast } from 'sonner';
 const getImageUrl = (url?: string) => {
   if (!url) return '';
   if (url.startsWith('http')) return url;
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:13001';
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:12001';
   return `${apiBase}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 

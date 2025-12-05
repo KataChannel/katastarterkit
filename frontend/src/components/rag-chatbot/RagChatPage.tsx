@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { 
   Send, 
   Bot, 
@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { getGraphqlEndpoint, getAuthToken } from '@/lib/api-config';
 
 // Types
 interface RAGSource {
@@ -157,7 +158,10 @@ const RAG_METRICS_QUERY = `
   }
 `;
 
-export function RagChatPage({ graphqlEndpoint = '/graphql' }: RagChatPageProps) {
+export function RagChatPage({ graphqlEndpoint }: RagChatPageProps) {
+  // Use configured endpoint or environment variable
+  const resolvedEndpoint = useMemo(() => graphqlEndpoint || getGraphqlEndpoint(), [graphqlEndpoint]);
+  
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -174,13 +178,17 @@ export function RagChatPage({ graphqlEndpoint = '/graphql' }: RagChatPageProps) 
   // Load metrics on mount
   useEffect(() => {
     loadMetrics();
-  }, []);
+  }, [resolvedEndpoint]);
 
   const loadMetrics = async () => {
     try {
-      const response = await fetch(graphqlEndpoint, {
+      const token = getAuthToken();
+      const response = await fetch(resolvedEndpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
         body: JSON.stringify({ query: RAG_METRICS_QUERY }),
       });
       const result = await response.json();
@@ -219,9 +227,13 @@ export function RagChatPage({ graphqlEndpoint = '/graphql' }: RagChatPageProps) 
     setIsLoading(true);
 
     try {
-      const response = await fetch(graphqlEndpoint, {
+      const token = getAuthToken();
+      const response = await fetch(resolvedEndpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
         body: JSON.stringify({
           query: RAG_CHAT_QUERY,
           variables: {
@@ -273,9 +285,13 @@ export function RagChatPage({ graphqlEndpoint = '/graphql' }: RagChatPageProps) 
   const getQuickStats = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(graphqlEndpoint, {
+      const token = getAuthToken();
+      const response = await fetch(resolvedEndpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
         body: JSON.stringify({ query: RAG_QUICK_STATS_QUERY }),
       });
 

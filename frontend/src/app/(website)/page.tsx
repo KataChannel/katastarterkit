@@ -14,7 +14,7 @@ const GET_HOMEPAGE_SETTINGS_QUERY = `
 // Fetch homepage redirect setting
 async function getHomepageRedirect(): Promise<string | null> {
   try {
-    const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:13001/graphql';
+    const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:12001/graphql';
     
     const response = await fetch(graphqlUrl, {
       method: 'POST',

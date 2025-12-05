@@ -106,7 +106,7 @@ export default function NewSourceDocumentPage() {
   const checkGoogleDriveStatus = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:13001';
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:12001';
       const response = await fetch(`${backendUrl}/api/lms/source-documents/google-drive/status`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -142,7 +142,7 @@ export default function NewSourceDocumentPage() {
     formDataUpload.append('file', file);
 
     const token = localStorage.getItem('accessToken');
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:13001';
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:12001';
     
     const response = await fetch(`${backendUrl}/api/lms/source-documents/upload`, {
       method: 'POST',
@@ -167,7 +167,7 @@ export default function NewSourceDocumentPage() {
     formDataUpload.append('file', file);
 
     const token = localStorage.getItem('accessToken');
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:13001';
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:12001';
     
     const response = await fetch(`${backendUrl}/api/lms/source-documents/upload-to-google-drive`, {
       method: 'POST',
@@ -198,7 +198,7 @@ export default function NewSourceDocumentPage() {
   // Upload from URL to Google Drive
   const uploadFromUrlToGoogleDrive = async (url: string): Promise<UploadedFileInfo> => {
     const token = localStorage.getItem('accessToken');
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:13001';
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:12001';
     
     const response = await fetch(`${backendUrl}/api/lms/source-documents/upload-to-google-drive-from-url`, {
       method: 'POST',
@@ -347,7 +347,7 @@ export default function NewSourceDocumentPage() {
 
       // Call backend to download and upload
       const token = localStorage.getItem('accessToken');
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:13001';
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:12001';
       const response = await fetch(
         `${backendUrl}/api/lms/source-documents/upload-from-url`,
         {

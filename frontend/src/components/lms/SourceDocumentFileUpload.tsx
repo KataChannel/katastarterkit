@@ -172,7 +172,7 @@ export default function SourceDocumentFileUpload({
       formData.append('0', selectedFile);
 
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:13001/graphql', {
+      const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:12001/graphql', {
         method: 'POST',
         headers: {
           ...(token && { authorization: `Bearer ${token}` }),
@@ -279,7 +279,7 @@ export default function SourceDocumentFileUpload({
       // Call backend to download and upload
       const token = localStorage.getItem('accessToken');
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:13001'}/api/lms/source-documents/upload-from-url`,
+        `${process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:12001'}/api/lms/source-documents/upload-from-url`,
         {
           method: 'POST',
           headers: {

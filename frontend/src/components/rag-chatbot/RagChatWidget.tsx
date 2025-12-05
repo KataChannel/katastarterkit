@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { 
   Send, 
   Bot, 
@@ -22,6 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { getGraphqlEndpoint, getAuthToken } from '@/lib/api-config';
 
 // Types
 interface RAGSource {
@@ -78,8 +79,11 @@ export function RagChatWidget({
   defaultExpanded = false,
   title = 'Trợ lý AI Rau Sạch',
   placeholder = 'Hỏi về sản phẩm, đơn hàng, khách hàng...',
-  graphqlEndpoint = '/graphql',
+  graphqlEndpoint,
 }: RagChatWidgetProps) {
+  // Use configured endpoint or environment variable
+  const resolvedEndpoint = useMemo(() => graphqlEndpoint || getGraphqlEndpoint(), [graphqlEndpoint]);
+  
   const [isOpen, setIsOpen] = useState(defaultExpanded);
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -132,10 +136,12 @@ export function RagChatWidget({
     setIsLoading(true);
 
     try {
-      const response = await fetch(graphqlEndpoint, {
+      const token = getAuthToken();
+      const response = await fetch(resolvedEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
         },
         body: JSON.stringify({
           query: RAG_CHAT_QUERY,

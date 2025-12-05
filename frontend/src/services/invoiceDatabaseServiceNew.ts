@@ -32,7 +32,7 @@ class InvoiceDatabaseService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:14000';
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:12001';
   }
 
   /**

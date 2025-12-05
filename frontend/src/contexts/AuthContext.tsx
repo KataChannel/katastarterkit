@@ -303,7 +303,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Fetch logout redirect URL from settings
     try {
-      const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:13001/graphql';
+      const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:12001/graphql';
       
       const response = await fetch(graphqlUrl, {
         method: 'POST',

@@ -271,6 +271,17 @@ type AddToCartResponse {
   success: Boolean!
 }
 
+input AdminClearHistoryInput {
+  """Xóa tin nhắn cũ hơn số ngày này"""
+  olderThanDays: Int
+}
+
+type AdminClearHistoryOutput {
+  deletedCount: Int!
+  message: String!
+  success: Boolean!
+}
+
 input AdminCreateUserInput {
   avatar: String
   email: String
@@ -1172,10 +1183,20 @@ type ChatMedia {
   url: String!
 }
 
+type ClearCacheOutput {
+  message: String!
+  success: Boolean!
+}
+
 type ClearCartResponse {
   cart: CartType
   errors: [String!]
   message: String
+  success: Boolean!
+}
+
+type ClearHistoryOutput {
+  message: String!
   success: Boolean!
 }
 
@@ -1212,6 +1233,23 @@ input CompleteStepInput {
   workflowInstanceId: String!
 }
 
+type ContextTypeCountOutput {
+  count: Int!
+  type: String!
+}
+
+"""Loại context để truy vấn RAG"""
+enum ContextTypeEnum {
+  ALL
+  BANGGIA
+  DONHANG
+  KHACHHANG
+  KHO
+  NHACUNGCAP
+  SANPHAM
+  TONKHO
+}
+
 """Employment contract types"""
 enum ContractType {
   CONTRACT
@@ -1220,6 +1258,13 @@ enum ContractType {
   INTERNSHIP
   PART_TIME
   PROBATION
+}
+
+type ConversationMessageOutput {
+  content: String!
+  id: String!
+  role: String!
+  timestamp: DateTime!
 }
 
 input CountInput {
@@ -2926,6 +2971,11 @@ enum IntegrationPlatform {
   ZALO
 }
 
+type IntentCountOutput {
+  count: Int!
+  intent: String!
+}
+
 type InvoiceCreated {
   detailsCount: Int!
   id: ID!
@@ -3481,6 +3531,24 @@ type Mutation {
   publishCourse(id: ID!): Course!
   publishPost(id: String!): Post!
   publishSystemRelease(id: String!): SystemRelease!
+
+  """Xóa lịch sử chat (Admin)"""
+  ragAdminClearHistory(input: AdminClearHistoryInput): AdminClearHistoryOutput!
+
+  """Xóa cache context (Admin)"""
+  ragClearCache: ClearCacheOutput!
+
+  """Xóa lịch sử hội thoại của user"""
+  ragClearHistory(conversationId: String): ClearHistoryOutput!
+
+  """Reset cấu hình về mặc định (Admin)"""
+  ragResetConfig: ClearCacheOutput!
+
+  """Seed cấu hình mặc định vào database (Admin)"""
+  ragSeedConfigs: ClearCacheOutput!
+
+  """Cập nhật cấu hình RAG (Admin)"""
+  ragUpdateConfig(input: RAGConfigInput!): ClearCacheOutput!
   rateTechnicalSupportTicket(input: RateTicketInput!): TechnicalSupportTicket!
   registerUser(input: RegisterUserInput!): AuthResponse!
 
@@ -4979,6 +5047,33 @@ type Query {
   quizAttempts(quizId: String!): [QuizAttempt!]!
   quizzesByLesson(lessonId: String!): [Quiz!]!
 
+  """Gửi câu hỏi đến RAG Chatbot và nhận câu trả lời"""
+  ragChat(input: RAGQueryInput!): RAGResponseOutput!
+
+  """Lấy tất cả cấu hình RAG (Admin)"""
+  ragConfigs: [RAGConfigOutput!]!
+
+  """Lấy lịch sử hội thoại của user (yêu cầu đăng nhập)"""
+  ragConversationHistory(conversationId: String, limit: Float = 20): [ConversationMessageOutput!]!
+
+  """Lấy metrics của RAG chatbot (Admin)"""
+  ragMetrics: RAGMetricsOutput!
+
+  """Lấy thống kê nhanh hệ thống"""
+  ragQuickStats: RAGResponseOutput!
+
+  """Tìm kiếm sản phẩm bằng từ khóa"""
+  ragSearchProducts(input: SearchProductsInput!): RAGResponseOutput!
+
+  """Kiểm tra trạng thái RAG service"""
+  ragStatus: RAGStatusOutput!
+
+  """Lấy thống kê sử dụng RAG (Admin)"""
+  ragUsageStats(userId: String): RAGUsageStatsOutput!
+
+  """Lấy danh sách hội thoại của user"""
+  ragUserConversations: [RAGConversationsOutput!]!
+
   """Số người đang truy cập website"""
   realtimeUsers: Int!
 
@@ -5143,6 +5238,71 @@ type QuizAttempt {
   timeSpent: Int
   updatedAt: DateTime!
   userId: String!
+}
+
+input RAGConfigInput {
+  description: String
+  key: String!
+  value: String!
+  valueType: String! = "string"
+}
+
+type RAGConfigOutput {
+  category: String
+  description: String
+  isSystem: Boolean!
+  key: String!
+  updatedAt: DateTime!
+  value: String!
+  valueType: String!
+}
+
+type RAGConversationsOutput {
+  conversationId: String!
+  lastMessage: DateTime!
+  messageCount: Int!
+}
+
+type RAGMetricsOutput {
+  avgResponseTime: Float!
+  successRate: Float!
+  topContextTypes: [ContextTypeCountOutput!]!
+  topIntents: [IntentCountOutput!]!
+  totalQueries: Int!
+}
+
+input RAGQueryInput {
+  contextTypes: [ContextTypeEnum!]
+  conversationId: String
+  message: String!
+}
+
+type RAGResponseOutput {
+  answer: String!
+  confidence: Float!
+  contextUsed: [String!]!
+  sources: [RAGSourceOutput!]!
+  suggestedQueries: [String!]
+}
+
+type RAGSourceOutput {
+  entity: String!
+  relevance: Float!
+  type: String!
+}
+
+type RAGStatusOutput {
+  isReady: Boolean!
+  message: String!
+  model: String
+}
+
+type RAGUsageStatsOutput {
+  avgConfidence: Float
+  avgResponseTime: Float
+  intentBreakdown: String!
+  totalConversations: Int!
+  totalMessages: Int!
 }
 
 input RateTicketInput {
@@ -5433,6 +5593,10 @@ input SaveProjectViewConfigInput {
   projectId: ID!
   userId: ID
   viewType: ProjectViewType!
+}
+
+input SearchProductsInput {
+  keyword: String!
 }
 
 input SetPasswordInput {

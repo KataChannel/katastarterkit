@@ -5,9 +5,9 @@
 
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from '../prisma/prisma.module';
-import { UserService } from '../services/user.service';
+import { UserModule } from '../user/user.module';
 
 // Services
 import {
@@ -31,6 +31,7 @@ import { RagChatbotResolver } from './rag-chatbot.resolver';
   imports: [
     ConfigModule,
     PrismaModule,
+    UserModule, // Import UserModule instead of declaring UserService directly
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -42,9 +43,6 @@ import { RagChatbotResolver } from './rag-chatbot.resolver';
   ],
   controllers: [RagChatbotController],
   providers: [
-    // User service (needed for auth)
-    UserService,
-    
     // Config service (needed first)
     RagConfigService,
     

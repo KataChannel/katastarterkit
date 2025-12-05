@@ -21,4 +21,4 @@ vi.mock('next/navigation', () => ({
 }));
 
 // Mock environment variables
-process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT = 'http://localhost:14000/graphql';
+process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT = 'http://localhost:12001/graphql';

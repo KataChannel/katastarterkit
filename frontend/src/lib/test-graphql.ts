@@ -4,7 +4,7 @@ import { setContext } from '@apollo/client/link/context';
 // Test file để debug GraphQL queries
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:14000/graphql',
+  uri: 'http://localhost:12001/graphql',
 });
 
 const authLink = setContext((_, { headers }) => {
