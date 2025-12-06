@@ -19,6 +19,7 @@ import {
   ImageIcon,
   DollarSign,
   AlertTriangle,
+  Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -44,6 +45,8 @@ interface TreeNode {
   displayOrder: number;
   productCount: number;
   products: any[];
+  isLoading?: boolean;
+  isLoaded?: boolean;
   data: any;
 }
 
@@ -159,9 +162,11 @@ export function ProductTreeView({
               size="sm"
               className="h-8 w-8 p-0"
               onClick={() => onToggleCategory(node.id)}
-              disabled={node.products.length === 0}
+              disabled={node.productCount === 0}
             >
-              {node.products.length > 0 ? (
+              {node.isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : node.productCount > 0 ? (
                 expandedCategories.has(node.id) ? (
                   <ChevronDown className="h-4 w-4" />
                 ) : (
@@ -247,10 +252,16 @@ export function ProductTreeView({
             </div>
           </div>
 
-          {/* Product List (Children) */}
-          {expandedCategories.has(node.id) && node.products.length > 0 && (
+          {/* Product List (Children) - Lazy Loading Support */}
+          {expandedCategories.has(node.id) && (
             <div className="bg-muted/30">
-              {node.products.map((product: any) => (
+              {node.isLoading ? (
+                <div className="flex items-center justify-center py-4 gap-2 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">Đang tải sản phẩm...</span>
+                </div>
+              ) : node.products.length > 0 ? (
+                node.products.map((product: any) => (
                 <div
                   key={product.id}
                   className="flex items-center gap-2 p-3 pl-16 hover:bg-muted/70 transition-colors border-l-2 border-primary/20 group/product"
@@ -342,7 +353,12 @@ export function ProductTreeView({
                     </Button>
                   </div>
                 </div>
-              ))}
+              ))
+              ) : node.isLoaded ? (
+                <div className="flex items-center justify-center py-4 text-muted-foreground">
+                  <span className="text-sm">Không có sản phẩm nào trong danh mục này</span>
+                </div>
+              ) : null}
             </div>
           )}
         </div>

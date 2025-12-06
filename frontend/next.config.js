@@ -47,6 +47,7 @@ const nextConfig = {
       'picsum.photos',
       'placehold.co',
       '1drv.ms',
+      'storage.tazagroup.vn',
     ],
     remotePatterns: [
       {
@@ -65,6 +66,16 @@ const nextConfig = {
         protocol: 'https',
         hostname: '116.118.49.243',
         pathname: '/rausach-uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'storage.tazagroup.vn',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'storage.tazagroup.vn',
+        pathname: '/**',
       },
       {
         protocol: 'https',

@@ -16,8 +16,9 @@ export class RagPrismaService extends PrismaClient implements OnModuleInit, OnMo
   private readonly logger = new Logger(RagPrismaService.name);
 
   constructor(private readonly configService: ConfigService) {
-    // Sử dụng RAG_DATABASE_URL nếu có, fallback về DATABASE_URL
-    const ragDatabaseUrl = configService.get<string>('RAG_DATABASE_URL') || 
+    // Ưu tiên process.env trước, sau đó configService, cuối cùng fallback DATABASE_URL
+    const ragDatabaseUrl = process.env.RAG_DATABASE_URL ||
+                           configService.get<string>('RAG_DATABASE_URL') || 
                            configService.get<string>('DATABASE_URL');
     
     super({
