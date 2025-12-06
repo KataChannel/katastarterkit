@@ -55,7 +55,23 @@ export class RagChatbotService {
    */
   async processQuery(query: RAGQuery): Promise<RAGResponse> {
     const startTime = Date.now();
-    this.logger.log(`Processing RAG query: ${query.message.substring(0, 100)}...`);
+    
+    // Validate input
+    if (!query || !query.message) {
+      this.logger.warn('Invalid RAG query: missing message');
+      return {
+        answer: 'Xin lỗi, tôi không nhận được câu hỏi của bạn. Vui lòng thử lại.',
+        sources: [],
+        contextUsed: [],
+        confidence: 0,
+        suggestedQueries: ['Danh sách sản phẩm', 'Thống kê đơn hàng', 'Tồn kho hiện tại'],
+      };
+    }
+    
+    const messagePreview = query.message.length > 100 
+      ? query.message.substring(0, 100) + '...' 
+      : query.message;
+    this.logger.log(`Processing RAG query: ${messagePreview}`);
 
     try {
       // 1. Phân tích intent từ câu hỏi

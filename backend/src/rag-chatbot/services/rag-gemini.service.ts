@@ -26,20 +26,24 @@ export class RagGeminiService {
   }
 
   private initializeGemini(): void {
-    const apiKey = this.configService.get<string>('GEMINI_API_KEY') || 
+    // Priority: RAG_GEMINI_API_KEY (dedicated for RAG) > GEMINI_API_KEY > GOOGLE_GEMINI_API_KEY
+    const apiKey = this.configService.get<string>('RAG_GEMINI_API_KEY') ||
+                   this.configService.get<string>('GEMINI_API_KEY') || 
+                   this.configService.get<string>('GOOGLE_GEMINI_API_KEY') ||
                    this.configService.get<string>('GOOGLE_API_KEY');
     
     if (!apiKey) {
-      this.logger.warn('GEMINI_API_KEY not configured. RAG features will be disabled.');
+      this.logger.warn('RAG Gemini API key not configured. RAG features will be disabled.');
+      this.logger.warn('Please set RAG_GEMINI_API_KEY in your .env file');
       return;
     }
 
     try {
       this.genAI = new GoogleGenerativeAI(apiKey);
       this.model = this.genAI.getGenerativeModel({ model: this.modelName });
-      this.logger.log(`Gemini AI initialized with model: ${this.modelName}`);
+      this.logger.log(`✅ RAG Gemini AI initialized with model: ${this.modelName}`);
     } catch (error) {
-      this.logger.error('Failed to initialize Gemini AI', error);
+      this.logger.error('Failed to initialize RAG Gemini AI', error);
     }
   }
 

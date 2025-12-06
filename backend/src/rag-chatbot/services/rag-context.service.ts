@@ -1,14 +1,13 @@
 /**
  * RAG Context Service - Rausach Domain
- * Service để lấy và quản lý context data từ database
+ * Service để lấy và quản lý context data từ database testdata
  * 
- * NOTE: Sử dụng raw SQL queries vì schema Prisma chính không có 
- * các model rausach (sanpham, donhang...). Nếu tables không tồn tại,
- * sẽ fallback về mock data để demo.
+ * Kết nối tới database: testdata (116.118.49.243:55432)
+ * Schema từ: external/noiborausach/schema.prisma
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { RagPrismaService } from './rag-prisma.service';
 import {
   RausachContext,
   SanphamContext,
@@ -21,82 +20,31 @@ import {
   ContextType,
 } from '../interfaces';
 
-// Mock data để demo khi database không có tables tương ứng
-const MOCK_DATA = {
-  sanpham: [
-    { id: '1', title: 'Rau cải ngọt', masp: 'SP001', giagoc: 15000, giaban: 20000, dvt: 'kg', soluong: 100, soluongkho: 80, vat: 0, isActive: true },
-    { id: '2', title: 'Cà chua cherry', masp: 'SP002', giagoc: 25000, giaban: 35000, dvt: 'kg', soluong: 50, soluongkho: 40, vat: 0, isActive: true },
-    { id: '3', title: 'Rau xà lách', masp: 'SP003', giagoc: 18000, giaban: 25000, dvt: 'kg', soluong: 80, soluongkho: 60, vat: 0, isActive: true },
-    { id: '4', title: 'Rau mồng tơi', masp: 'SP004', giagoc: 12000, giaban: 18000, dvt: 'kg', soluong: 120, soluongkho: 100, vat: 0, isActive: true },
-    { id: '5', title: 'Cà rốt sạch', masp: 'SP005', giagoc: 20000, giaban: 28000, dvt: 'kg', soluong: 90, soluongkho: 70, vat: 0, isActive: true },
-    { id: '6', title: 'Dưa leo baby', masp: 'SP006', giagoc: 22000, giaban: 30000, dvt: 'kg', soluong: 60, soluongkho: 45, vat: 0, isActive: true },
-    { id: '7', title: 'Rau muống sạch', masp: 'SP007', giagoc: 10000, giaban: 15000, dvt: 'kg', soluong: 150, soluongkho: 120, vat: 0, isActive: true },
-    { id: '8', title: 'Ớt chuông đỏ', masp: 'SP008', giagoc: 45000, giaban: 55000, dvt: 'kg', soluong: 30, soluongkho: 25, vat: 0, isActive: true },
-    { id: '9', title: 'Bắp cải trắng', masp: 'SP009', giagoc: 16000, giaban: 22000, dvt: 'kg', soluong: 70, soluongkho: 55, vat: 0, isActive: true },
-    { id: '10', title: 'Hành lá sạch', masp: 'SP010', giagoc: 8000, giaban: 12000, dvt: 'bó', soluong: 200, soluongkho: 180, vat: 0, isActive: true },
-  ],
-  donhang: [
-    { id: '1', madonhang: 'DH001', ngaygiao: new Date('2024-01-15'), status: 'hoanthanh', tongtien: 520000, tongvat: 0, khachhangName: 'Nhà hàng ABC', sanphamCount: 5 },
-    { id: '2', madonhang: 'DH002', ngaygiao: new Date('2024-01-16'), status: 'danggiao', tongtien: 380000, tongvat: 0, khachhangName: 'Quán ăn XYZ', sanphamCount: 3 },
-    { id: '3', madonhang: 'DH003', ngaygiao: new Date('2024-01-17'), status: 'choxuly', tongtien: 750000, tongvat: 0, khachhangName: 'Siêu thị MiniMart', sanphamCount: 8 },
-    { id: '4', madonhang: 'DH004', ngaygiao: new Date('2024-01-18'), status: 'hoanthanh', tongtien: 420000, tongvat: 0, khachhangName: 'Khách sạn 5 sao', sanphamCount: 4 },
-    { id: '5', madonhang: 'DH005', ngaygiao: new Date('2024-01-19'), status: 'dahuy', tongtien: 180000, tongvat: 0, khachhangName: 'Căng tin trường học', sanphamCount: 2 },
-  ],
-  khachhang: [
-    { id: '1', name: 'Nhà hàng ABC', makh: 'KH001', diachi: '123 Lê Lợi, Q.1', sdt: '0901234567', loaikh: 'sỉ', donhangCount: 15 },
-    { id: '2', name: 'Quán ăn XYZ', makh: 'KH002', diachi: '456 Nguyễn Huệ, Q.1', sdt: '0912345678', loaikh: 'sỉ', donhangCount: 8 },
-    { id: '3', name: 'Siêu thị MiniMart', makh: 'KH003', diachi: '789 Trần Hưng Đạo, Q.5', sdt: '0923456789', loaikh: 'sỉ', donhangCount: 25 },
-    { id: '4', name: 'Khách sạn 5 sao', makh: 'KH004', diachi: '321 Đồng Khởi, Q.1', sdt: '0934567890', loaikh: 'vip', donhangCount: 12 },
-    { id: '5', name: 'Căng tin trường học', makh: 'KH005', diachi: '654 Cách Mạng Tháng 8, Q.3', sdt: '0945678901', loaikh: 'lẻ', donhangCount: 5 },
-  ],
-  nhacungcap: [
-    { id: '1', name: 'HTX Rau sạch Củ Chi', mancc: 'NCC001', diachi: 'Củ Chi, TP.HCM', sdt: '0281234567', dathangCount: 30 },
-    { id: '2', name: 'Trang trại Đà Lạt Green', mancc: 'NCC002', diachi: 'Đà Lạt, Lâm Đồng', sdt: '0631234567', dathangCount: 22 },
-    { id: '3', name: 'Nông trại Organic Farm', mancc: 'NCC003', diachi: 'Long An', sdt: '0721234567', dathangCount: 18 },
-  ],
-  tonkho: [
-    { id: '1', sanphamTitle: 'Rau cải ngọt', masp: 'SP001', slton: 80, slchogiao: 15, slchonhap: 0, sltontt: 65 },
-    { id: '2', sanphamTitle: 'Cà chua cherry', masp: 'SP002', slton: 40, slchogiao: 8, slchonhap: 20, sltontt: 52 },
-    { id: '3', sanphamTitle: 'Rau xà lách', masp: 'SP003', slton: 60, slchogiao: 10, slchonhap: 0, sltontt: 50 },
-    { id: '4', sanphamTitle: 'Rau mồng tơi', masp: 'SP004', slton: 100, slchogiao: 20, slchonhap: 30, sltontt: 110 },
-    { id: '5', sanphamTitle: 'Cà rốt sạch', masp: 'SP005', slton: 70, slchogiao: 12, slchonhap: 15, sltontt: 73 },
-  ],
-  banggia: [
-    { id: '1', title: 'Giá bán lẻ', mabanggia: 'BG001', type: 'retail', batdau: new Date('2024-01-01'), ketthuc: new Date('2024-12-31'), isDefault: true, sanphamCount: 50 },
-    { id: '2', title: 'Giá sỉ nhà hàng', mabanggia: 'BG002', type: 'wholesale', batdau: new Date('2024-01-01'), ketthuc: new Date('2024-12-31'), isDefault: false, sanphamCount: 50 },
-    { id: '3', title: 'Giá VIP', mabanggia: 'BG003', type: 'vip', batdau: new Date('2024-01-01'), ketthuc: new Date('2024-06-30'), isDefault: false, sanphamCount: 30 },
-  ],
-  kho: [
-    { id: '1', name: 'Kho Củ Chi', makho: 'KHO01', diachi: 'Khu CN Tây Bắc, Củ Chi', congtyName: 'Rausach Corp' },
-    { id: '2', name: 'Kho Bình Dương', makho: 'KHO02', diachi: 'KCN VSIP, Bình Dương', congtyName: 'Rausach Corp' },
-    { id: '3', name: 'Kho Q7', makho: 'KHO03', diachi: '789 Nguyễn Thị Thập, Q.7', congtyName: 'Rausach Corp' },
-  ],
-};
-
 @Injectable()
-export class RagContextService {
+export class RagContextService implements OnModuleInit {
   private readonly logger = new Logger(RagContextService.name);
   private contextCache: Map<string, { data: any; timestamp: number }> = new Map();
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 phút
-  private useMockData = true; // Mặc định dùng mock data
+  private databaseAvailable = false;
 
-  constructor(private readonly prisma: PrismaService) {
-    // Kiểm tra database có tables cần thiết không khi service khởi tạo
-    this.checkDatabaseTables();
+  constructor(private readonly prisma: RagPrismaService) {}
+
+  async onModuleInit() {
+    await this.checkDatabaseConnection();
   }
 
   /**
-   * Kiểm tra xem database có tables rausach không
+   * Kiểm tra kết nối database và tables
    */
-  private async checkDatabaseTables(): Promise<void> {
+  private async checkDatabaseConnection(): Promise<void> {
     try {
-      // Thử query raw để check table exists
-      await this.prisma.$queryRaw`SELECT 1 FROM "Sanpham" LIMIT 1`;
-      this.useMockData = false;
-      this.logger.log('Database tables found, using real data');
-    } catch {
-      this.useMockData = true;
-      this.logger.warn('Database tables not found, using mock data for demo');
+      // Kiểm tra kết nối và table Sanpham
+      const result = await this.prisma.$queryRaw<any[]>`SELECT COUNT(*) as count FROM "Sanpham" LIMIT 1`;
+      this.databaseAvailable = true;
+      this.logger.log('✅ RAG Context: Connected to testdata database successfully');
+    } catch (error) {
+      this.databaseAvailable = false;
+      this.logger.error('❌ RAG Context: Failed to connect to database', error.message);
     }
   }
 
@@ -140,95 +88,351 @@ export class RagContextService {
   }
 
   /**
-   * Lấy thông tin sản phẩm với cache
+   * Lấy thông tin sản phẩm từ database với cache
    */
   async getSanphamContext(): Promise<SanphamContext[]> {
     const cached = this.getFromCache<SanphamContext[]>('sanpham');
     if (cached) return cached;
 
-    // Luôn dùng mock data vì schema không có model sanpham
-    this.setCache('sanpham', MOCK_DATA.sanpham);
-    return MOCK_DATA.sanpham;
+    try {
+      const sanphams = await this.prisma.$queryRaw<any[]>`
+        SELECT 
+          id, 
+          title, 
+          masp, 
+          CAST(giagoc AS FLOAT) as giagoc,
+          CAST(giaban AS FLOAT) as giaban, 
+          dvt, 
+          CAST(soluong AS FLOAT) as soluong, 
+          CAST(soluongkho AS FLOAT) as soluongkho,
+          CAST(COALESCE(vat, 0) AS FLOAT) as vat,
+          "isActive"
+        FROM "Sanpham" 
+        WHERE "isActive" = true
+        ORDER BY title ASC
+        LIMIT 100
+      `;
+
+      const result: SanphamContext[] = sanphams.map(sp => ({
+        id: sp.id,
+        title: sp.title,
+        masp: sp.masp,
+        giagoc: Number(sp.giagoc) || 0,
+        giaban: Number(sp.giaban) || 0,
+        dvt: sp.dvt,
+        soluong: Number(sp.soluong) || 0,
+        soluongkho: Number(sp.soluongkho) || 0,
+        vat: Number(sp.vat) || 0,
+        isActive: sp.isActive,
+      }));
+
+      this.logger.debug(`Fetched ${result.length} products from database`);
+      this.setCache('sanpham', result);
+      return result;
+    } catch (error) {
+      this.logger.error('Error fetching Sanpham from database', error.message);
+      return [];
+    }
   }
 
   /**
-   * Lấy thông tin đơn hàng
+   * Lấy thông tin đơn hàng từ database
    */
   async getDonhangContext(): Promise<DonhangContext[]> {
     const cached = this.getFromCache<DonhangContext[]>('donhang');
     if (cached) return cached;
 
-    this.setCache('donhang', MOCK_DATA.donhang);
-    return MOCK_DATA.donhang;
+    try {
+      const donhangs = await this.prisma.$queryRaw<any[]>`
+        SELECT 
+          d.id,
+          d.madonhang,
+          d.ngaygiao,
+          d.status,
+          CAST(d.tongtien AS FLOAT) as tongtien,
+          CAST(d.tongvat AS FLOAT) as tongvat,
+          k.name as "khachhangName",
+          (SELECT COUNT(*) FROM "Donhangsanpham" WHERE "donhangId" = d.id) as "sanphamCount"
+        FROM "Donhang" d
+        LEFT JOIN "Khachhang" k ON d."khachhangId" = k.id
+        ORDER BY d."createdAt" DESC
+        LIMIT 100
+      `;
+
+      const result: DonhangContext[] = donhangs.map(dh => ({
+        id: dh.id,
+        madonhang: dh.madonhang,
+        ngaygiao: dh.ngaygiao,
+        status: dh.status,
+        tongtien: Number(dh.tongtien) || 0,
+        tongvat: Number(dh.tongvat) || 0,
+        khachhangName: dh.khachhangName,
+        sanphamCount: Number(dh.sanphamCount) || 0,
+      }));
+
+      this.logger.debug(`Fetched ${result.length} orders from database`);
+      this.setCache('donhang', result);
+      return result;
+    } catch (error) {
+      this.logger.error('Error fetching Donhang from database', error.message);
+      return [];
+    }
   }
 
   /**
-   * Lấy thông tin khách hàng
+   * Lấy thông tin khách hàng từ database
    */
   async getKhachhangContext(): Promise<KhachhangContext[]> {
     const cached = this.getFromCache<KhachhangContext[]>('khachhang');
     if (cached) return cached;
 
-    this.setCache('khachhang', MOCK_DATA.khachhang);
-    return MOCK_DATA.khachhang;
+    try {
+      const khachhangs = await this.prisma.$queryRaw<any[]>`
+        SELECT 
+          k.id,
+          k.name,
+          k.makh,
+          k.diachi,
+          k.sdt,
+          k.loaikh,
+          (SELECT COUNT(*) FROM "Donhang" WHERE "khachhangId" = k.id) as "donhangCount"
+        FROM "Khachhang" k
+        WHERE k."isActive" = true OR k."isActive" IS NULL
+        ORDER BY k.name ASC
+        LIMIT 100
+      `;
+
+      const result: KhachhangContext[] = khachhangs.map(kh => ({
+        id: kh.id,
+        name: kh.name,
+        makh: kh.makh,
+        diachi: kh.diachi,
+        sdt: kh.sdt,
+        loaikh: kh.loaikh,
+        donhangCount: Number(kh.donhangCount) || 0,
+      }));
+
+      this.logger.debug(`Fetched ${result.length} customers from database`);
+      this.setCache('khachhang', result);
+      return result;
+    } catch (error) {
+      this.logger.error('Error fetching Khachhang from database', error.message);
+      return [];
+    }
   }
 
   /**
-   * Lấy thông tin nhà cung cấp
+   * Lấy thông tin nhà cung cấp từ database
    */
   async getNhacungcapContext(): Promise<NhacungcapContext[]> {
     const cached = this.getFromCache<NhacungcapContext[]>('nhacungcap');
     if (cached) return cached;
 
-    this.setCache('nhacungcap', MOCK_DATA.nhacungcap);
-    return MOCK_DATA.nhacungcap;
+    try {
+      const nhacungcaps = await this.prisma.$queryRaw<any[]>`
+        SELECT 
+          n.id,
+          n.name,
+          n.mancc,
+          n.diachi,
+          n.sdt,
+          (SELECT COUNT(*) FROM "Dathang" WHERE "nhacungcapId" = n.id) as "dathangCount"
+        FROM "Nhacungcap" n
+        WHERE n."isActive" = true
+        ORDER BY n.name ASC
+        LIMIT 50
+      `;
+
+      const result: NhacungcapContext[] = nhacungcaps.map(ncc => ({
+        id: ncc.id,
+        name: ncc.name,
+        mancc: ncc.mancc,
+        diachi: ncc.diachi,
+        sdt: ncc.sdt,
+        dathangCount: Number(ncc.dathangCount) || 0,
+      }));
+
+      this.logger.debug(`Fetched ${result.length} suppliers from database`);
+      this.setCache('nhacungcap', result);
+      return result;
+    } catch (error) {
+      this.logger.error('Error fetching Nhacungcap from database', error.message);
+      return [];
+    }
   }
 
   /**
-   * Lấy thông tin tồn kho
+   * Lấy thông tin tồn kho từ database
    */
   async getTonkhoContext(): Promise<TonkhoContext[]> {
     const cached = this.getFromCache<TonkhoContext[]>('tonkho');
     if (cached) return cached;
 
-    this.setCache('tonkho', MOCK_DATA.tonkho);
-    return MOCK_DATA.tonkho;
+    try {
+      const tonkhos = await this.prisma.$queryRaw<any[]>`
+        SELECT 
+          t.id,
+          s.title as "sanphamTitle",
+          s.masp,
+          CAST(t.slton AS FLOAT) as slton,
+          CAST(t.slchogiao AS FLOAT) as slchogiao,
+          CAST(t.slchonhap AS FLOAT) as slchonhap,
+          CAST(t.sltontt AS FLOAT) as sltontt
+        FROM "TonKho" t
+        JOIN "Sanpham" s ON t."sanphamId" = s.id
+        ORDER BY s.title ASC
+        LIMIT 100
+      `;
+
+      const result: TonkhoContext[] = tonkhos.map(tk => ({
+        id: tk.id,
+        sanphamTitle: tk.sanphamTitle,
+        masp: tk.masp,
+        slton: Number(tk.slton) || 0,
+        slchogiao: Number(tk.slchogiao) || 0,
+        slchonhap: Number(tk.slchonhap) || 0,
+        sltontt: Number(tk.sltontt) || 0,
+      }));
+
+      this.logger.debug(`Fetched ${result.length} inventory records from database`);
+      this.setCache('tonkho', result);
+      return result;
+    } catch (error) {
+      this.logger.error('Error fetching TonKho from database', error.message);
+      return [];
+    }
   }
 
   /**
-   * Lấy thông tin bảng giá
+   * Lấy thông tin bảng giá từ database
    */
   async getBanggiaContext(): Promise<BanggiaContext[]> {
     const cached = this.getFromCache<BanggiaContext[]>('banggia');
     if (cached) return cached;
 
-    this.setCache('banggia', MOCK_DATA.banggia);
-    return MOCK_DATA.banggia;
+    try {
+      const banggias = await this.prisma.$queryRaw<any[]>`
+        SELECT 
+          b.id,
+          b.title,
+          b.mabanggia,
+          b.type,
+          b.batdau,
+          b.ketthuc,
+          b."isDefault",
+          (SELECT COUNT(*) FROM "Banggiasanpham" WHERE "banggiaId" = b.id) as "sanphamCount"
+        FROM "Banggia" b
+        WHERE b."isActive" = true
+        ORDER BY b."isDefault" DESC, b.title ASC
+        LIMIT 20
+      `;
+
+      const result: BanggiaContext[] = banggias.map(bg => ({
+        id: bg.id,
+        title: bg.title,
+        mabanggia: bg.mabanggia,
+        type: bg.type,
+        batdau: bg.batdau,
+        ketthuc: bg.ketthuc,
+        isDefault: bg.isDefault || false,
+        sanphamCount: Number(bg.sanphamCount) || 0,
+      }));
+
+      this.logger.debug(`Fetched ${result.length} price lists from database`);
+      this.setCache('banggia', result);
+      return result;
+    } catch (error) {
+      this.logger.error('Error fetching Banggia from database', error.message);
+      return [];
+    }
   }
 
   /**
-   * Lấy thông tin kho
+   * Lấy thông tin kho từ database
    */
   async getKhoContext(): Promise<KhoContext[]> {
     const cached = this.getFromCache<KhoContext[]>('kho');
     if (cached) return cached;
 
-    this.setCache('kho', MOCK_DATA.kho);
-    return MOCK_DATA.kho;
+    try {
+      const khos = await this.prisma.$queryRaw<any[]>`
+        SELECT 
+          k.id,
+          k.name,
+          k.makho,
+          k.diachi,
+          c.name as "congtyName"
+        FROM "Kho" k
+        LEFT JOIN "Congty" c ON k."congtyId" = c.id
+        WHERE k."isActive" = true
+        ORDER BY k.name ASC
+        LIMIT 20
+      `;
+
+      const result: KhoContext[] = khos.map(kho => ({
+        id: kho.id,
+        name: kho.name,
+        makho: kho.makho,
+        diachi: kho.diachi,
+        congtyName: kho.congtyName,
+      }));
+
+      this.logger.debug(`Fetched ${result.length} warehouses from database`);
+      this.setCache('kho', result);
+      return result;
+    } catch (error) {
+      this.logger.error('Error fetching Kho from database', error.message);
+      return [];
+    }
   }
 
   /**
    * Tìm kiếm sản phẩm theo từ khóa
    */
   async searchSanpham(keyword: string): Promise<SanphamContext[]> {
-    const lowerKeyword = keyword.toLowerCase();
-    return MOCK_DATA.sanpham.filter(
-      (sp) => sp.title.toLowerCase().includes(lowerKeyword) || sp.masp.toLowerCase().includes(lowerKeyword)
-    );
+    const lowerKeyword = `%${keyword.toLowerCase()}%`;
+    
+    try {
+      const sanphams = await this.prisma.$queryRaw<any[]>`
+        SELECT 
+          id, 
+          title, 
+          masp, 
+          CAST(giagoc AS FLOAT) as giagoc,
+          CAST(giaban AS FLOAT) as giaban, 
+          dvt, 
+          CAST(soluong AS FLOAT) as soluong, 
+          CAST(soluongkho AS FLOAT) as soluongkho,
+          CAST(COALESCE(vat, 0) AS FLOAT) as vat,
+          "isActive"
+        FROM "Sanpham" 
+        WHERE 
+          "isActive" = true 
+          AND (LOWER(title) LIKE ${lowerKeyword} OR LOWER(masp) LIKE ${lowerKeyword})
+        ORDER BY title ASC
+        LIMIT 20
+      `;
+
+      return sanphams.map(sp => ({
+        id: sp.id,
+        title: sp.title,
+        masp: sp.masp,
+        giagoc: Number(sp.giagoc) || 0,
+        giaban: Number(sp.giaban) || 0,
+        dvt: sp.dvt,
+        soluong: Number(sp.soluong) || 0,
+        soluongkho: Number(sp.soluongkho) || 0,
+        vat: Number(sp.vat) || 0,
+        isActive: sp.isActive,
+      }));
+    } catch (error) {
+      this.logger.error('Error searching Sanpham', error.message);
+      return [];
+    }
   }
 
   /**
-   * Lấy thống kê tổng quan
+   * Lấy thống kê tổng quan từ database
    */
   async getStatistics(): Promise<{
     totalSanpham: number;
@@ -241,21 +445,67 @@ export class RagContextService {
     const cached = this.getFromCache<any>('statistics');
     if (cached) return cached;
 
-    const mockStats = {
-      totalSanpham: MOCK_DATA.sanpham.length,
-      totalDonhang: MOCK_DATA.donhang.length,
-      totalKhachhang: MOCK_DATA.khachhang.length,
-      totalNhacungcap: MOCK_DATA.nhacungcap.length,
-      doanhThu: MOCK_DATA.donhang.filter(d => d.status === 'hoanthanh').reduce((sum, d) => sum + d.tongtien, 0),
-      donhangStatus: [
-        { status: 'hoanthanh', count: 2 },
-        { status: 'danggiao', count: 1 },
-        { status: 'choxuly', count: 1 },
-        { status: 'dahuy', count: 1 },
-      ],
-    };
-    this.setCache('statistics', mockStats);
-    return mockStats;
+    try {
+      // Đếm sản phẩm
+      const sanphamCount = await this.prisma.$queryRaw<any[]>`
+        SELECT COUNT(*) as count FROM "Sanpham" WHERE "isActive" = true
+      `;
+      
+      // Đếm đơn hàng
+      const donhangCount = await this.prisma.$queryRaw<any[]>`
+        SELECT COUNT(*) as count FROM "Donhang"
+      `;
+      
+      // Đếm khách hàng
+      const khachhangCount = await this.prisma.$queryRaw<any[]>`
+        SELECT COUNT(*) as count FROM "Khachhang" WHERE "isActive" = true OR "isActive" IS NULL
+      `;
+      
+      // Đếm nhà cung cấp
+      const nhacungcapCount = await this.prisma.$queryRaw<any[]>`
+        SELECT COUNT(*) as count FROM "Nhacungcap" WHERE "isActive" = true
+      `;
+      
+      // Tính doanh thu từ đơn hàng hoàn thành
+      const doanhThuResult = await this.prisma.$queryRaw<any[]>`
+        SELECT COALESCE(SUM(CAST(tongtien AS FLOAT)), 0) as total 
+        FROM "Donhang" 
+        WHERE status = 'hoanthanh' OR status = 'danhan'
+      `;
+      
+      // Thống kê theo trạng thái đơn hàng
+      const statusCounts = await this.prisma.$queryRaw<any[]>`
+        SELECT status, COUNT(*) as count 
+        FROM "Donhang" 
+        GROUP BY status
+      `;
+
+      const stats = {
+        totalSanpham: Number(sanphamCount[0]?.count) || 0,
+        totalDonhang: Number(donhangCount[0]?.count) || 0,
+        totalKhachhang: Number(khachhangCount[0]?.count) || 0,
+        totalNhacungcap: Number(nhacungcapCount[0]?.count) || 0,
+        doanhThu: Number(doanhThuResult[0]?.total) || 0,
+        donhangStatus: statusCounts.map(s => ({
+          status: s.status,
+          count: Number(s.count) || 0,
+        })),
+      };
+
+      this.logger.debug('Fetched statistics from database:', stats);
+      this.setCache('statistics', stats);
+      return stats;
+    } catch (error) {
+      this.logger.error('Error fetching statistics from database', error.message);
+      return {
+        totalSanpham: 0,
+        totalDonhang: 0,
+        totalKhachhang: 0,
+        totalNhacungcap: 0,
+        doanhThu: 0,
+        donhangStatus: [],
+      };
+    }
   }
 
   /**
@@ -271,8 +521,15 @@ export class RagContextService {
    */
   async refreshContext(): Promise<void> {
     this.clearCache();
-    await this.checkDatabaseTables();
+    await this.checkDatabaseConnection();
     this.logger.log('Context refreshed');
+  }
+
+  /**
+   * Kiểm tra database có available không
+   */
+  isDatabaseAvailable(): boolean {
+    return this.databaseAvailable;
   }
 
   private getFromCache<T>(key: string): T | null {

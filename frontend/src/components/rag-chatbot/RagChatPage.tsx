@@ -159,8 +159,12 @@ const RAG_METRICS_QUERY = `
 `;
 
 export function RagChatPage({ graphqlEndpoint }: RagChatPageProps) {
-  // Use configured endpoint or environment variable
-  const resolvedEndpoint = useMemo(() => graphqlEndpoint || getGraphqlEndpoint(), [graphqlEndpoint]);
+  // Use configured endpoint or environment variable with guaranteed fallback
+  const resolvedEndpoint = useMemo(() => {
+    const endpoint = graphqlEndpoint || getGraphqlEndpoint() || 'http://localhost:12001/graphql';
+    console.log('[RagChatPage] Resolved GraphQL endpoint:', endpoint);
+    return endpoint;
+  }, [graphqlEndpoint]);
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -191,7 +195,20 @@ export function RagChatPage({ graphqlEndpoint }: RagChatPageProps) {
         },
         body: JSON.stringify({ query: RAG_METRICS_QUERY }),
       });
+      
+      if (!response.ok) {
+        console.error('Failed to load metrics: HTTP', response.status);
+        return;
+      }
+      
       const result = await response.json();
+      
+      // Check for GraphQL errors
+      if (result.errors && Array.isArray(result.errors) && result.errors.length > 0) {
+        console.error('GraphQL errors:', result.errors);
+        return;
+      }
+      
       if (result.data?.ragMetrics) {
         setMetrics(result.data.ragMetrics);
       }
@@ -244,8 +261,15 @@ export function RagChatPage({ graphqlEndpoint }: RagChatPageProps) {
 
       const result = await response.json();
 
-      if (result.errors) {
-        throw new Error(result.errors[0]?.message || 'Có lỗi xảy ra');
+      // Check for GraphQL errors
+      if (result.errors && Array.isArray(result.errors) && result.errors.length > 0) {
+        const errorMessage = result.errors[0]?.message || JSON.stringify(result.errors);
+        throw new Error(errorMessage);
+      }
+
+      // Check if response is valid
+      if (!result.data?.ragChat) {
+        throw new Error('Không nhận được phản hồi từ server');
       }
 
       const ragResponse: RAGResponse = result.data.ragChat;
@@ -295,7 +319,17 @@ export function RagChatPage({ graphqlEndpoint }: RagChatPageProps) {
         body: JSON.stringify({ query: RAG_QUICK_STATS_QUERY }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
       const result = await response.json();
+
+      // Check for GraphQL errors
+      if (result.errors && Array.isArray(result.errors) && result.errors.length > 0) {
+        const errorMessage = result.errors[0]?.message || JSON.stringify(result.errors);
+        throw new Error(errorMessage);
+      }
 
       if (result.data?.ragQuickStats) {
         const ragResponse: RAGResponse = result.data.ragQuickStats;

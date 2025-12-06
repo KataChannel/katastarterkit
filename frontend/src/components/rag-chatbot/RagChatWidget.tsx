@@ -81,8 +81,10 @@ export function RagChatWidget({
   placeholder = 'Hỏi về sản phẩm, đơn hàng, khách hàng...',
   graphqlEndpoint,
 }: RagChatWidgetProps) {
-  // Use configured endpoint or environment variable
-  const resolvedEndpoint = useMemo(() => graphqlEndpoint || getGraphqlEndpoint(), [graphqlEndpoint]);
+  // Use configured endpoint or environment variable with guaranteed fallback
+  const resolvedEndpoint = useMemo(() => {
+    return graphqlEndpoint || getGraphqlEndpoint() || 'http://localhost:12001/graphql';
+  }, [graphqlEndpoint]);
   
   const [isOpen, setIsOpen] = useState(defaultExpanded);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -153,10 +155,21 @@ export function RagChatWidget({
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
       const result = await response.json();
 
-      if (result.errors) {
-        throw new Error(result.errors[0]?.message || 'Có lỗi xảy ra');
+      // Check for GraphQL errors
+      if (result.errors && Array.isArray(result.errors) && result.errors.length > 0) {
+        const errorMessage = result.errors[0]?.message || JSON.stringify(result.errors);
+        throw new Error(errorMessage);
+      }
+
+      // Check if response is valid
+      if (!result.data?.ragChat) {
+        throw new Error('Không nhận được phản hồi từ server');
       }
 
       const ragResponse: RAGResponse = result.data.ragChat;

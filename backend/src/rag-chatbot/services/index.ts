@@ -1,3 +1,4 @@
+export * from './rag-prisma.service';
 export * from './rag-context.service';
 export * from './rag-intent.service';
 export * from './rag-gemini.service';

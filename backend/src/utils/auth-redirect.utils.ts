@@ -94,9 +94,9 @@ export async function getRegisterRedirectUrl(): Promise<string> {
 /**
  * Get specific setting value
  */
-export async function getAuthSetting(key: string): Promise<string | null> {
-  const setting = await prisma.websiteSetting.findUnique({
-    where: { key }
+export async function getAuthSetting(key: string, domain: string = 'default'): Promise<string | null> {
+  const setting = await prisma.websiteSetting.findFirst({
+    where: { key, domain }
   });
   return setting?.value || null;
 }
@@ -107,10 +107,11 @@ export async function getAuthSetting(key: string): Promise<string | null> {
 export async function updateAuthRedirectSetting(
   key: string, 
   value: string,
-  userId?: string
+  userId?: string,
+  domain: string = 'default'
 ): Promise<void> {
   await prisma.websiteSetting.update({
-    where: { key },
+    where: { key_domain: { key, domain } },
     data: { 
       value,
       updatedBy: userId

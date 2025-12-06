@@ -1,0 +1,281 @@
+// Prisma schema cho RAG Chatbot - Kết nối tới database testdata (noiborausach)
+// Generate command: npx prisma generate --schema=prisma-rag/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/rag-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("RAG_DATABASE_URL")
+}
+
+// ==========================================
+// ENUMS (đặt trước models)
+// ==========================================
+
+enum StatusDonhang {
+  dadat
+  dagiao
+  danhan
+  huy
+  hoanthanh
+}
+
+// ==========================================
+// MODELS TỪ DATABASE TESTDATA (NOIBORAUSACH)
+// ==========================================
+
+model Sanpham {
+  id         String   @id @default(uuid())
+  title      String
+  title2     String?
+  slug       String?  @unique
+  masp       String   @unique
+  subtitle   String?
+  giagoc     Decimal  @default(0) @db.Decimal(20, 3)
+  dvt        String?
+  hinhanh    String?
+  loadpoint  Decimal? @default(0) @db.Decimal(20, 3)
+  soluong    Decimal? @default(0) @db.Decimal(20, 3)
+  soluongkho Decimal? @default(0) @db.Decimal(20, 3)
+  haohut     Decimal  @default(0) @db.Decimal(20, 3)
+  ghichu     String?
+  order      Int?     @default(1)
+  isActive   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  giaban     Decimal  @default(0) @db.Decimal(20, 3)
+  vat        Decimal? @default(0) @db.Decimal(20, 3)
+
+  // Relations
+  banggia        Banggiasanpham[]
+  Donhangsanpham Donhangsanpham[]
+  TonKho         TonKho?
+
+  @@index([masp])
+  @@index([title])
+}
+
+model Donhang {
+  id               String        @id @default(uuid())
+  title            String?
+  type             String?
+  madonhang        String        @unique
+  ngaygiao         DateTime?
+  ghichu           String?
+  status           StatusDonhang @default(dadat)
+  khachhangId      String?
+  printCount       Int?          @default(0)
+  order            Int?
+  isActive         Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  isshowvat        Boolean       @default(false)
+  tongtien         Decimal       @default(0) @db.Decimal(20, 3)
+  tongvat          Decimal       @default(0) @db.Decimal(20, 3)
+  banggiaId        String?
+  vat              Decimal       @default(0.5) @db.Decimal(20, 3)
+  lydohuy          String?
+  phieuve          String?
+  giodi            String?
+  giove            String?
+  kynhan           String?
+  nhanvienchiahang String?
+  shipper          String?
+
+  // Relations
+  khachhang Khachhang?       @relation(fields: [khachhangId], references: [id])
+  sanpham   Donhangsanpham[]
+
+  @@index([ngaygiao])
+  @@index([status])
+  @@index([khachhangId])
+  @@index([createdAt])
+}
+
+model Donhangsanpham {
+  id        String   @id @default(uuid())
+  idSP      String
+  sldat     Decimal  @default(0) @db.Decimal(20, 3)
+  slgiao    Decimal  @default(0) @db.Decimal(20, 3)
+  slnhan    Decimal  @default(0) @db.Decimal(20, 3)
+  slhuy     Decimal  @default(0) @db.Decimal(20, 3)
+  ttdat     Decimal  @default(0) @db.Decimal(20, 3)
+  ttgiao    Decimal  @default(0) @db.Decimal(20, 3)
+  ttnhan    Decimal  @default(0) @db.Decimal(20, 3)
+  ghichu    String?
+  donhangId String
+  order     Int?
+  isActive  Boolean? @default(false)
+  giaban    Decimal  @default(0) @db.Decimal(20, 3)
+  ttsauvat  Decimal  @default(0) @db.Decimal(20, 3)
+  vat       Decimal  @default(0) @db.Decimal(20, 3)
+
+  donhang Donhang @relation(fields: [donhangId], references: [id], onDelete: Cascade)
+  sanpham Sanpham @relation(fields: [idSP], references: [id])
+
+  @@index([donhangId])
+  @@index([idSP])
+}
+
+model Khachhang {
+  id          String    @id @default(uuid())
+  name        String?
+  namenn      String?
+  subtitle    String?
+  makh        String    @unique
+  makhold     String?
+  diachi      String?
+  sdt         String?
+  mst         String?
+  gionhanhang String?
+  quan        String?
+  email       String?
+  phone       String?
+  address     String?
+  loaikh      String?
+  ghichu      String?
+  hiengia     Boolean   @default(false)
+  isActive    Boolean   @default(false)
+  istitle2    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tenfile     String?
+  tenkh       String?
+  banggiaId   String?
+  isshowvat   Boolean   @default(true)
+  machuyen    String?
+
+  // Relations
+  donhang Donhang[]
+
+  @@index([name])
+  @@index([makh])
+}
+
+model Nhacungcap {
+  id        String    @id @default(uuid())
+  name      String?
+  mancc     String    @unique
+  manccold  String?
+  diachi    String?
+  email     String?
+  sdt       String?
+  ghichu    String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  isshowvat Boolean   @default(true)
+  tenfile   String?
+
+  // Relations
+  dathang Dathang[]
+
+  @@index([mancc])
+}
+
+model Dathang {
+  id           String        @id @default(uuid())
+  title        String?
+  type         String?
+  madncc       String?       @unique
+  ngaynhan     DateTime?
+  ghichu       String?
+  nhacungcapId String?
+  order        Int?
+  isActive     Boolean       @default(false)
+  status       StatusDonhang @default(dadat)
+  printCount   Int?          @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime?     @updatedAt
+  subtitle     String?
+  khoId        String?
+  lydohuy      String?
+
+  // Relations
+  nhacungcap Nhacungcap? @relation(fields: [nhacungcapId], references: [id])
+
+  @@index([ngaynhan])
+  @@index([status])
+  @@index([nhacungcapId])
+}
+
+model Banggia {
+  id        String   @id @default(uuid())
+  title     String?
+  mabanggia String?
+  type      String?
+  batdau    DateTime?
+  ketthuc   DateTime?
+  order     Int?     @default(1)
+  ghichu    String?
+  status    String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDefault Boolean  @default(false)
+
+  // Relations
+  sanpham Banggiasanpham[]
+
+  @@index([mabanggia])
+}
+
+model Banggiasanpham {
+  id        String  @id @default(uuid())
+  giaban    Decimal @default(0) @db.Decimal(20, 3)
+  sanphamId String
+  banggiaId String
+  order     Int?
+  isActive  Boolean @default(false)
+
+  banggia Banggia @relation(fields: [banggiaId], references: [id])
+  sanpham Sanpham @relation(fields: [sanphamId], references: [id])
+
+  @@unique([banggiaId, sanphamId], name: "unique_banggia_sanpham")
+}
+
+model TonKho {
+  id        String  @id @default(uuid())
+  sanphamId String  @unique
+  slton     Decimal @default(0) @db.Decimal(20, 3)
+  slchogiao Decimal @default(0) @db.Decimal(20, 3)
+  slchonhap Decimal @default(0) @db.Decimal(20, 3)
+  sltontt   Decimal @default(0) @db.Decimal(20, 3)
+
+  sanpham Sanpham @relation(fields: [sanphamId], references: [id])
+}
+
+model Kho {
+  id        String   @id @default(uuid())
+  name      String
+  makho     String?
+  diachi    String?
+  sdt       String?
+  ghichu    String?
+  congtyId  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  congty Congty? @relation(fields: [congtyId], references: [id])
+
+  @@index([makho])
+}
+
+model Congty {
+  id        String   @id @default(uuid())
+  name      String
+  diachi    String?
+  email     String?
+  sdt       String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  kho Kho[]
+}

@@ -263,13 +263,14 @@ export class ProductService {
     }
 
     // Cập nhật nameNormalized nếu name thay đổi
+    const updateData: any = { ...data };
     if (data.name) {
-      data.nameNormalized = removeVietnameseDiacritics(data.name).toLowerCase();
+      updateData.nameNormalized = removeVietnameseDiacritics(data.name).toLowerCase();
     }
 
     return this.prisma.product.update({
       where: { id },
-      data,
+      data: updateData,
       include: {
         category: true,
         images: { orderBy: { order: 'asc' } },

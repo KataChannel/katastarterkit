@@ -823,10 +823,19 @@ export async function seedWebsiteSettings() {
   ];
 
   for (const setting of settings) {
+    const domain = (setting as any).domain || 'default';
     await prisma.websiteSetting.upsert({
-      where: { key: setting.key },
+      where: { 
+        key_domain: { 
+          key: setting.key, 
+          domain: domain 
+        } 
+      },
       update: setting,
-      create: setting,
+      create: {
+        ...setting,
+        domain: domain,
+      },
     });
   }
 

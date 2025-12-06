@@ -3,6 +3,7 @@
  */
 
 import { Field, InputType, ObjectType, Float, Int, registerEnumType } from '@nestjs/graphql';
+import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 // Enums
 export enum ContextTypeEnum {
@@ -24,7 +25,10 @@ registerEnumType(ContextTypeEnum, {
 // Input Types
 @InputType()
 export class RAGQueryInput {
-  @Field(() => String)
+  @Field(() => String, { description: 'Câu hỏi hoặc yêu cầu của người dùng' })
+  @IsString()
+  @IsNotEmpty({ message: 'Vui lòng nhập câu hỏi' })
+  @MinLength(1, { message: 'Câu hỏi không được để trống' })
   message: string;
 
   @Field(() => String, { nullable: true })

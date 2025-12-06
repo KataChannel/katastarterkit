@@ -19,6 +19,7 @@ import {
 import { RagChatbotService } from './services/rag-chatbot.service';
 import { RagHistoryService } from './services/rag-history.service';
 import { RagConfigService, RAGSettings } from './services/rag-config.service';
+import { RagContextService } from './services/rag-context.service';
 import { RagAuthGuard, RagPublic, RagAdminOnly, RagRateLimitGuard } from './guards';
 import { ContextType } from './interfaces';
 
@@ -45,11 +46,52 @@ export class RagChatbotController {
     private readonly ragService: RagChatbotService,
     private readonly ragHistoryService: RagHistoryService,
     private readonly ragConfigService: RagConfigService,
+    private readonly ragContextService: RagContextService,
   ) {}
 
   // ==========================================
   // PUBLIC ENDPOINTS
   // ==========================================
+
+  /**
+   * GET /api/rag/test-db - Test kết nối database và lấy dữ liệu mẫu
+   */
+  @RagPublic()
+  @Get('test-db')
+  async testDatabase() {
+    const isDbAvailable = this.ragContextService.isDatabaseAvailable();
+    
+    // Lấy mẫu dữ liệu từ database
+    const [sanpham, donhang, khachhang, stats] = await Promise.all([
+      this.ragContextService.getSanphamContext(),
+      this.ragContextService.getDonhangContext(),
+      this.ragContextService.getKhachhangContext(),
+      this.ragContextService.getStatistics(),
+    ]);
+
+    return {
+      success: true,
+      databaseAvailable: isDbAvailable,
+      data: {
+        sanpham: {
+          count: sanpham.length,
+          sample: sanpham.slice(0, 5),
+        },
+        donhang: {
+          count: donhang.length,
+          sample: donhang.slice(0, 5),
+        },
+        khachhang: {
+          count: khachhang.length,
+          sample: khachhang.slice(0, 5),
+        },
+        statistics: stats,
+      },
+      message: isDbAvailable 
+        ? '✅ Đang lấy dữ liệu từ database testdata' 
+        : '⚠️ Không thể kết nối tới database',
+    };
+  }
 
   /**
    * POST /api/rag/chat - Gửi tin nhắn đến chatbot

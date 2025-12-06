@@ -5274,6 +5274,8 @@ type RAGMetricsOutput {
 input RAGQueryInput {
   contextTypes: [ContextTypeEnum!]
   conversationId: String
+
+  """Câu hỏi hoặc yêu cầu của người dùng"""
   message: String!
 }
 

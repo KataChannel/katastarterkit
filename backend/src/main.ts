@@ -24,7 +24,8 @@ import { graphqlUploadExpress } from 'graphql-upload-ts';
 
 // Load environment variables
 dotenv.config({ path: join(__dirname, '../.env.local') });
-dotenv.config({ path: join(__dirname, '../../.env') });
+dotenv.config({ path: join(__dirname, '../.env') }); // backend/.env
+dotenv.config({ path: join(__dirname, '../../.env') }); // root .env (fallback)
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

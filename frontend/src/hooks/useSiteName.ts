@@ -8,7 +8,7 @@ export function useSiteName() {
   const { value: siteName, loading } = useWebsiteSetting('site.name');
   
   return {
-    siteName: siteName || 'NoNameCore',
+    siteName: siteName || 'LMS',
     loading,
   };
 }

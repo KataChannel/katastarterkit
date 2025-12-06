@@ -38,10 +38,10 @@ export const websiteSettingResolvers = {
       });
     },
 
-    // Lấy 1 setting theo key
-    websiteSetting: async (_: any, { key }: any) => {
-      return await prisma.websiteSetting.findUnique({
-        where: { key },
+    // Lấy 1 setting theo key (sử dụng findFirst vì key + domain là compound unique)
+    websiteSetting: async (_: any, { key, domain }: any) => {
+      return await prisma.websiteSetting.findFirst({
+        where: { key, domain: domain || 'default' },
       });
     },
 
@@ -137,7 +137,7 @@ export const websiteSettingResolvers = {
     },
 
     // Update setting
-    updateWebsiteSetting: async (_: any, { key, input }: any, context: any) => {
+    updateWebsiteSetting: async (_: any, { key, input, domain }: any, context: any) => {
       // Check authentication
       if (!context.user) {
         throw new GraphQLError('Unauthorized', {
@@ -145,8 +145,9 @@ export const websiteSettingResolvers = {
         });
       }
 
+      const targetDomain = domain || 'default';
       return await prisma.websiteSetting.update({
-        where: { key },
+        where: { key_domain: { key, domain: targetDomain } },
         data: {
           ...input,
           updatedBy: context.user.id,
@@ -155,7 +156,7 @@ export const websiteSettingResolvers = {
     },
 
     // Update nhiều settings cùng lúc
-    updateWebsiteSettings: async (_: any, { settings }: any, context: any) => {
+    updateWebsiteSettings: async (_: any, { settings, domain }: any, context: any) => {
       // Check authentication
       if (!context.user) {
         throw new GraphQLError('Unauthorized', {
@@ -163,10 +164,11 @@ export const websiteSettingResolvers = {
         });
       }
 
+      const targetDomain = domain || 'default';
       const results = [];
       for (const { key, value } of settings) {
         const updated = await prisma.websiteSetting.update({
-          where: { key },
+          where: { key_domain: { key, domain: targetDomain } },
           data: {
             value,
             updatedBy: context.user.id,
@@ -179,7 +181,7 @@ export const websiteSettingResolvers = {
     },
 
     // Xóa setting
-    deleteWebsiteSetting: async (_: any, { key }: any, context: any) => {
+    deleteWebsiteSetting: async (_: any, { key, domain }: any, context: any) => {
       // Check authentication
       if (!context.user) {
         throw new GraphQLError('Unauthorized', {
@@ -187,13 +189,14 @@ export const websiteSettingResolvers = {
         });
       }
 
+      const targetDomain = domain || 'default';
       return await prisma.websiteSetting.delete({
-        where: { key },
+        where: { key_domain: { key, domain: targetDomain } },
       });
     },
 
     // Bulk update từ JSON
-    bulkUpdateWebsiteSettings: async (_: any, { data }: any, context: any) => {
+    bulkUpdateWebsiteSettings: async (_: any, { data, domain }: any, context: any) => {
       // Check authentication
       if (!context.user) {
         throw new GraphQLError('Unauthorized', {
@@ -201,18 +204,20 @@ export const websiteSettingResolvers = {
         });
       }
 
+      const targetDomain = domain || 'default';
       const settingsData = JSON.parse(data);
       const results = [];
 
       for (const [key, value] of Object.entries(settingsData)) {
         const updated = await prisma.websiteSetting.upsert({
-          where: { key },
+          where: { key_domain: { key, domain: targetDomain } },
           update: {
             value: String(value),
             updatedBy: context.user.id,
           },
           create: {
             key,
+            domain: targetDomain,
             value: String(value),
             type: 'TEXT',
             category: 'GENERAL',

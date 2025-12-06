@@ -1,6 +1,8 @@
 /**
  * RAG Chatbot Module - Rausach Domain
  * Module tích hợp RAG với Gemini AI cho hệ thống quản lý rau sạch
+ * 
+ * Kết nối tới database testdata riêng biệt qua RAG_DATABASE_URL
  */
 
 import { Module } from '@nestjs/common';
@@ -11,6 +13,7 @@ import { UserModule } from '../user/user.module';
 
 // Services
 import {
+  RagPrismaService,
   RagChatbotService,
   RagContextService,
   RagIntentService,
@@ -43,6 +46,9 @@ import { RagChatbotResolver } from './rag-chatbot.resolver';
   ],
   controllers: [RagChatbotController],
   providers: [
+    // RAG-specific Prisma client (connects to testdata database)
+    RagPrismaService,
+    
     // Config service (needed first)
     RagConfigService,
     
@@ -62,6 +68,7 @@ import { RagChatbotResolver } from './rag-chatbot.resolver';
     RagChatbotResolver,
   ],
   exports: [
+    RagPrismaService,
     RagChatbotService,
     RagContextService,
     RagIntentService,
